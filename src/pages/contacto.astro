@@ -1,0 +1,20 @@
+---
+import MainLayout from '../components/layout/MainLayout.astro';
+import ContactHero from '../components/contact/ContactHero.astro';
+import ContactForm from '../components/contact/ContactForm.astro';
+import FinalCTA from '../components/home/FinalCTA';
+---
+
+<MainLayout
+  title="Contacto | Korvalia"
+  description="¿Tienes alguna pregunta? Contacta con nosotros y te ayudaremos a encontrar tu hogar ideal en Sanlúcar de Barrameda."
+>
+  <!-- Hero -->
+  <ContactHero />
+
+  <!-- Formulario de contacto con imagen -->
+  <ContactForm />
+
+  <!-- CTA Final -->
+  <FinalCTA client:load />
+</MainLayout>

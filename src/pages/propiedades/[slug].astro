@@ -1,0 +1,241 @@
+---
+import MainLayout from "../../components/layout/MainLayout.astro";
+import PropertyHeroWithInfo from "../../components/property-detail/PropertyHeroWithInfo.astro";
+import MapAndContact from "../../components/property-detail/MapAndContact.astro";
+import PropertyGrid from "../../components/properties/PropertyGrid";
+import FinalCTA from "../../components/home/FinalCTA";
+import type { Property } from "../../types/property";
+
+const { slug } = Astro.params;
+const API_BASE = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
+
+// Placeholder para propiedades sin imagen - imagen gris con icono de casa
+const PLACEHOLDER_IMAGE = "https://placehold.co/800x600/e5e7eb/9ca3af?text=Sin+imagen";
+
+// Helper para construir URL completa de imagen
+function getImageUrl(url: string): string {
+  if (!url) return PLACEHOLDER_IMAGE;
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  return `${API_BASE}${url.startsWith('/') ? '' : '/'}${url}`;
+}
+
+// Propiedad por defecto (cuando hay error de conexión)
+let property: any = null;
+let similarProperties: Property[] = [];
+let loadError = false;
+
+// Intentar obtener la propiedad del backend
+try {
+  const res = await fetch(`${API_BASE}/api/properties/slug/${slug}`);
+  if (res.ok) {
+    const json = await res.json();
+    if (json.data) {
+      // Procesar imágenes con URL completa
+      const processedImages = json.data.images?.map((img: any) => {
+        return getImageUrl(img.url || img);
+      }) || [];
+
+      // Si no hay imágenes, usar placeholder
+      if (processedImages.length === 0) {
+        processedImages.push(PLACEHOLDER_IMAGE);
+      }
+
+      property = {
+        ...json.data,
+        images: processedImages,
+        // Extraer nombre de ciudad si es objeto
+        city: typeof json.data.city === 'object' ? json.data.city?.name : json.data.city || 'Sin ciudad',
+        // Guardar coordenadas
+        latitude: json.data.latitude,
+        longitude: json.data.longitude,
+      };
+    }
+  } else {
+    loadError = true;
+  }
+} catch (error) {
+  console.error("Error al obtener la propiedad:", error);
+  loadError = true;
+}
+
+// Intentar obtener propiedades similares (pedimos más para poder filtrar la actual)
+try {
+  const res = await fetch(`${API_BASE}/api/properties?limit=6&status=ACTIVE`);
+  if (res.ok) {
+    const json = await res.json();
+    const propertiesData = json.data?.properties || json.data || [];
+    if (propertiesData.length > 0) {
+      similarProperties = propertiesData
+        .filter((p: any) => property && p.id !== property.id) // Excluir la propiedad actual
+        .slice(0, 3) // Tomar solo 3
+        .map((p: any) => {
+          // Procesar imagen - buscar en images array o usar placeholder
+          const imageUrl = p.images?.[0]?.url
+            ? getImageUrl(p.images[0].url)
+            : PLACEHOLDER_IMAGE;
+
+          return {
+            id: p.id,
+            title: p.title,
+            slug: p.slug,
+            price: p.price,
+            city: p.city?.name ?? p.city ?? "",
+            neighborhood: p.neighborhood ?? "",
+            operation: p.operation,
+            propertyType: p.propertyType,
+            areaM2: p.areaM2,
+            bedrooms: p.bedrooms,
+            bathrooms: p.bathrooms,
+            imageUrl: imageUrl,
+          };
+        });
+    }
+  }
+} catch (error) {
+  console.error("Error al obtener propiedades similares:", error);
+}
+---
+
+{/* Si no se encontró la propiedad, mostrar error */}
+{!property ? (
+  <MainLayout title="Propiedad no encontrada | Korvalia" description="La propiedad solicitada no existe o no está disponible.">
+    <div style="text-align: center; padding: 6rem 2rem;">
+      <h1 style="font-size: 2rem; color: #39505d; margin-bottom: 1rem;">Propiedad no encontrada</h1>
+      <p style="color: #6b7280; margin-bottom: 2rem;">La propiedad que buscas no existe o ya no está disponible.</p>
+      <a href="/propiedades" style="display: inline-block; padding: 0.875rem 2rem; background: #133b34; color: white; border-radius: 10px; text-decoration: none;">
+        Ver todas las propiedades
+      </a>
+    </div>
+  </MainLayout>
+) : (
+<MainLayout title={`${property.title} | Korvalia`} description={property.description?.substring(0, 160) + "..." || ""}>
+  <!-- Hero con imagen e info en dos columnas -->
+  <PropertyHeroWithInfo
+    images={property.images}
+    title={property.title}
+    price={property.price}
+    operation={property.operation}
+    description={property.description}
+    bedrooms={property.bedrooms}
+    bathrooms={property.bathrooms}
+    areaM2={property.areaM2}
+    city={property.city}
+    neighborhood={property.neighborhood}
+  />
+
+  <!-- Mapa y Formulario de contacto -->
+  <MapAndContact
+    propertyTitle={property.title}
+    propertyId={property.id}
+    city={property.city}
+    latitude={property.latitude}
+    longitude={property.longitude}
+    neighborhood={property.neighborhood}
+  />
+
+  <!-- Propiedades similares -->
+  <section class="similar-properties-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Otras propiedades que te pueden interesar</h2>
+        <p class="section-subtitle">Descubre más opciones similares en la zona</p>
+      </div>
+
+      <!-- Grid de propiedades similares -->
+      <PropertyGrid properties={similarProperties} client:load />
+
+      <div class="view-more-wrapper">
+        <a href="/propiedades" class="btn-view-more">
+          Ver todas las propiedades
+          <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Final -->
+  <FinalCTA client:load />
+</MainLayout>
+)}
+
+<style>
+  .similar-properties-section {
+    padding: 4rem 0;
+    background: #f8fafc;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .section-title {
+    font-family: "Montserrat", system-ui, sans-serif;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #39505d;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .section-subtitle {
+    font-size: 1rem;
+    color: #6a8074;
+    margin: 0;
+  }
+
+  .view-more-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 2.5rem;
+  }
+
+  .btn-view-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2rem;
+    background: #133b34;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-view-more:hover {
+    background: #0f2d27;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(19, 59, 52, 0.3);
+  }
+
+  .btn-icon {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.2s;
+  }
+
+  .btn-view-more:hover .btn-icon {
+    transform: translateX(4px);
+  }
+
+  @media (max-width: 768px) {
+    .similar-properties-section {
+      padding: 3rem 0;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+    }
+  }
+</style>

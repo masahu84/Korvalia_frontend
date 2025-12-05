@@ -1,0 +1,64 @@
+---
+// Sección de propiedades similares
+import PropertyGrid from '../properties/PropertyGrid';
+import type { Property } from '../../types/property';
+
+export interface Props {
+  properties: Property[];
+}
+
+const { properties } = Astro.props;
+---
+
+<section class="similar-properties">
+  <div class="container">
+    <h3 class="section-title">Propiedades similares</h3>
+    <p class="section-subtitle">Otras opciones que podrían interesarte</p>
+
+    <div class="properties-wrapper">
+      <PropertyGrid properties={properties} client:load />
+    </div>
+  </div>
+</section>
+
+<style>
+  .similar-properties {
+    padding: 4rem 0 5rem;
+    background: #f7f2ec;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .section-title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #39505d;
+    text-align: center;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .section-subtitle {
+    font-size: 1rem;
+    color: #6a8074;
+    text-align: center;
+    margin: 0 0 2.5rem 0;
+  }
+
+  .properties-wrapper {
+    max-width: 100%;
+  }
+
+  @media (max-width: 768px) {
+    .similar-properties {
+      padding: 3rem 0 4rem;
+    }
+
+    .section-title {
+      font-size: 1.75rem;
+    }
+  }
+</style>

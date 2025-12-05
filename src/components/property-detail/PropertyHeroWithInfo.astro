@@ -1,0 +1,338 @@
+---
+// Hero con imagen grande a la izquierda e información a la derecha
+export interface Props {
+  images: string[];
+  title: string;
+  price: number;
+  operation: 'RENT' | 'SALE';
+  description: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  areaM2?: number;
+  city: string;
+  neighborhood?: string;
+  address?: string;
+}
+
+const {
+  images,
+  title,
+  price,
+  operation,
+  description,
+  bedrooms,
+  bathrooms,
+  areaM2,
+  city,
+  neighborhood,
+  address
+} = Astro.props;
+
+const mainImage = images[0] || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&h=800&fit=crop';
+const formatPrice = (price: number) => new Intl.NumberFormat('es-ES').format(price);
+---
+
+<section class="property-hero-info">
+  <div class="container">
+    <div class="hero-grid">
+      <!-- Columna izquierda: Imagen -->
+      <div class="image-column">
+        <!-- Imagen principal -->
+        <div class="main-image-wrapper">
+          <img src={mainImage} alt={title} class="main-image" id="main-property-image" />
+        </div>
+
+        <!-- Galería de thumbnails -->
+        {images.length > 1 && (
+          <div class="thumbnails-grid">
+            {images.map((img, index) => (
+              <button
+                class="thumbnail-btn"
+                data-image={img}
+                aria-label={`Ver imagen ${index + 1}`}
+              >
+                <img src={img} alt={`${title} - ${index + 1}`} class="thumbnail-img" />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <!-- Columna derecha: Información -->
+      <div class="info-column">
+        <h1 class="property-title">{title}</h1>
+
+        <div class="price-badge">
+          {formatPrice(price)}€{operation === 'RENT' && <span class="price-suffix">/mes</span>}
+        </div>
+
+        <div class="property-description">
+          {description.split('\n').map((paragraph: string) => (
+            paragraph.trim() && <p>{paragraph}</p>
+          ))}
+        </div>
+
+        <!-- Detalles en iconos -->
+        <div class="details-row">
+          {bedrooms && (
+            <div class="detail-item">
+              <svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-width="2" d="M3 9h18v12H3z"/>
+                <path stroke-width="2" d="M9 21V9"/>
+                <path stroke-width="2" d="M15 21V9"/>
+                <path stroke-width="2" d="M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v3H3V6z"/>
+              </svg>
+              <span class="detail-value">{bedrooms}</span>
+            </div>
+          )}
+
+          {bathrooms && (
+            <div class="detail-item">
+              <svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="7" cy="7" r="3" stroke-width="2"/>
+                <path stroke-width="2" d="M7 10v11"/>
+                <path stroke-width="2" d="M21 21v-3a7 7 0 0 0-7-7H7"/>
+              </svg>
+              <span class="detail-value">{bathrooms}</span>
+            </div>
+          )}
+
+          {areaM2 && (
+            <div class="detail-item">
+              <svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="18" height="18" rx="2" stroke-width="2"/>
+              </svg>
+              <span class="detail-value">{areaM2}</span>
+            </div>
+          )}
+
+          <div class="detail-item">
+            <svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+            </svg>
+            <span class="detail-value">1</span>
+          </div>
+        </div>
+
+        <!-- Dirección -->
+        <div class="address-section">
+          <p class="address-text">
+            {address || `${city}${neighborhood ? `, ${neighborhood}` : ''} - Cádiz, Andalucía`}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .property-hero-info {
+    padding: 3rem 0 2rem;
+    background: white;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  @media (max-width: 968px) {
+    .hero-grid {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  }
+
+  .image-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .main-image-wrapper {
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .main-image {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .thumbnails-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 0.5rem;
+  }
+
+  .thumbnail-btn {
+    width: 100%;
+    aspect-ratio: 1;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: none;
+    padding: 0;
+  }
+
+  .thumbnail-btn:hover {
+    border-color: #c3a77a;
+    transform: scale(1.05);
+  }
+
+  .thumbnail-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .info-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .property-title {
+    font-family: "Montserrat", system-ui, sans-serif;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #39505d;
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  .price-badge {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #c3a77a;
+    color: white;
+    border-radius: 8px;
+    font-size: 1.5rem;
+    font-weight: 600;
+    align-self: flex-start;
+  }
+
+  .price-suffix {
+    font-size: 1rem;
+    font-weight: 400;
+    opacity: 0.9;
+  }
+
+  .property-description {
+    color: #6a8074;
+    line-height: 1.7;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+  }
+
+  .property-description p {
+    margin: 0 0 0.75rem 0;
+    font-size: 0.9375rem;
+  }
+
+  .property-description p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Scrollbar personalizado */
+  .property-description::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .property-description::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+
+  .property-description::-webkit-scrollbar-thumb {
+    background: #c3a77a;
+    border-radius: 3px;
+  }
+
+  .property-description::-webkit-scrollbar-thumb:hover {
+    background: #b39669;
+  }
+
+  .details-row {
+    display: flex;
+    gap: 2rem;
+    padding: 1rem 0;
+  }
+
+  .detail-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .detail-icon {
+    width: 28px;
+    height: 28px;
+    color: #39505d;
+  }
+
+  .detail-value {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #39505d;
+  }
+
+  .address-section {
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .address-text {
+    font-size: 0.9375rem;
+    color: #6a8074;
+    margin: 0;
+  }
+
+  @media (max-width: 640px) {
+    .property-title {
+      font-size: 1.5rem;
+    }
+
+    .price-badge {
+      font-size: 1.25rem;
+    }
+
+    .details-row {
+      gap: 1rem;
+    }
+  }
+</style>
+
+<script>
+  // Cambiar imagen principal al hacer clic en thumbnail
+  document.addEventListener('DOMContentLoaded', () => {
+    const thumbnails = document.querySelectorAll('.thumbnail-btn');
+    const mainImage = document.getElementById('main-property-image') as HTMLImageElement;
+
+    thumbnails.forEach((thumb) => {
+      thumb.addEventListener('click', () => {
+        const imageUrl = thumb.getAttribute('data-image');
+        if (imageUrl && mainImage) {
+          mainImage.src = imageUrl;
+        }
+      });
+    });
+  });
+</script>

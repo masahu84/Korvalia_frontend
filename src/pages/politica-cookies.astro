@@ -1,0 +1,236 @@
+---
+import MainLayout from "../components/layout/MainLayout.astro";
+
+const API_BASE = import.meta.env.PUBLIC_API_URL || "http://localhost:4000";
+
+let companyName = "Korvalia Inmobiliaria";
+let email = "";
+
+try {
+  const response = await fetch(`${API_BASE}/api/settings`);
+  if (response.ok) {
+    const result = await response.json();
+    const data = result.data || {};
+    companyName = data.companyName || companyName;
+    email = data.email || "";
+  }
+} catch (error) {
+  console.error("Error al cargar datos:", error);
+}
+---
+
+<MainLayout title="Política de Cookies | Korvalia" description="Política de cookies de Korvalia Inmobiliaria">
+  <div class="legal-page">
+    <div class="legal-container">
+      <h1 class="legal-title">Política de Cookies</h1>
+
+      <section class="legal-section">
+        <h2>1. ¿Qué son las cookies?</h2>
+        <p>
+          Las cookies son pequeños archivos de texto que se almacenan en su dispositivo (ordenador, tablet o móvil) cuando visita un sitio web. Las cookies permiten que el sitio web reconozca su dispositivo y almacene información sobre sus preferencias o acciones anteriores.
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>2. ¿Qué tipos de cookies utiliza este sitio web?</h2>
+        <p>En este sitio web utilizamos los siguientes tipos de cookies:</p>
+
+        <h3>Cookies Técnicas (Necesarias)</h3>
+        <p>
+          Son aquellas que permiten al usuario la navegación a través del sitio web y la utilización de las diferentes opciones o servicios que en ella existen. Por ejemplo, controlar el tráfico y la comunicación de datos, identificar la sesión o acceder a partes de acceso restringido.
+        </p>
+
+        <h3>Cookies de Análisis</h3>
+        <p>
+          Son aquellas que permiten cuantificar el número de usuarios y así realizar la medición y análisis estadístico de la utilización que hacen los usuarios del servicio ofertado. Para ello se analiza su navegación en nuestra página web con el fin de mejorar la oferta de productos o servicios que le ofrecemos.
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>3. Cookies utilizadas en este sitio web</h2>
+        <table class="cookies-table">
+          <thead>
+            <tr>
+              <th>Cookie</th>
+              <th>Tipo</th>
+              <th>Finalidad</th>
+              <th>Duración</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>admin_token</td>
+              <td>Técnica</td>
+              <td>Mantiene la sesión del usuario en el panel de administración</td>
+              <td>Sesión</td>
+            </tr>
+            <tr>
+              <td>cookies_accepted</td>
+              <td>Técnica</td>
+              <td>Almacena el consentimiento del usuario sobre el uso de cookies</td>
+              <td>1 año</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="legal-section">
+        <h2>4. ¿Cómo gestionar las cookies?</h2>
+        <p>
+          Puede permitir, bloquear o eliminar las cookies instaladas en su equipo mediante la configuración de las opciones del navegador instalado en su dispositivo.
+        </p>
+        <p>A continuación, le facilitamos enlaces sobre cómo gestionar las cookies en los navegadores más comunes:</p>
+        <ul>
+          <li><a href="https://support.google.com/chrome/answer/95647?hl=es" target="_blank" rel="noopener">Google Chrome</a></li>
+          <li><a href="https://support.mozilla.org/es/kb/habilitar-y-deshabilitar-cookies-sitios-web-rastrear-preferencias" target="_blank" rel="noopener">Mozilla Firefox</a></li>
+          <li><a href="https://support.microsoft.com/es-es/windows/eliminar-y-administrar-cookies-168dab11-0753-043d-7c16-ede5947fc64d" target="_blank" rel="noopener">Microsoft Edge</a></li>
+          <li><a href="https://support.apple.com/es-es/guide/safari/sfri11471/mac" target="_blank" rel="noopener">Safari</a></li>
+        </ul>
+        <p>
+          Si deshabilita las cookies, es posible que algunas funcionalidades del sitio web no estén disponibles.
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>5. Consentimiento</h2>
+        <p>
+          Al navegar y continuar en este sitio web, usted está consintiendo el uso de las cookies en los términos contenidos en esta Política de Cookies. Si desea no aceptar el uso de cookies, puede configurar su navegador según lo indicado en el punto anterior.
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>6. Modificación de la Política de Cookies</h2>
+        <p>
+          {companyName} puede modificar esta Política de Cookies en función de exigencias legislativas, reglamentarias, o con la finalidad de adaptar dicha política a las instrucciones dictadas por la autoridad de control, en este caso, la Agencia Española de Protección de Datos.
+        </p>
+        <p>
+          Cuando se produzcan cambios significativos en esta Política de Cookies, se comunicarán a los usuarios mediante aviso informativo en el sitio web.
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>7. Contacto</h2>
+        <p>
+          Para cualquier duda o consulta sobre esta Política de Cookies, puede contactar con nosotros en:
+        </p>
+        <p><strong>Email:</strong> {email || "Información de contacto disponible en el aviso legal"}</p>
+      </section>
+    </div>
+  </div>
+</MainLayout>
+
+<style>
+  .legal-page {
+    background: #ffffff;
+    min-height: calc(100vh - 200px);
+    padding: 4rem 0;
+  }
+
+  .legal-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .legal-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .legal-section {
+    margin-bottom: 2.5rem;
+  }
+
+  .legal-section h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #39505d;
+    margin-bottom: 1rem;
+  }
+
+  .legal-section h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #4b5563;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .legal-section p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #4b5563;
+    margin-bottom: 1rem;
+  }
+
+  .legal-section ul {
+    list-style: disc;
+    padding-left: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .legal-section li {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #4b5563;
+    margin-bottom: 0.5rem;
+  }
+
+  .legal-section a {
+    color: #39505d;
+    text-decoration: underline;
+  }
+
+  .legal-section a:hover {
+    color: #133b34;
+  }
+
+  .cookies-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+  }
+
+  .cookies-table thead {
+    background: #f3f4f6;
+  }
+
+  .cookies-table th,
+  .cookies-table td {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border: 1px solid #e5e7eb;
+  }
+
+  .cookies-table th {
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .cookies-table td {
+    color: #4b5563;
+  }
+
+  @media (max-width: 768px) {
+    .legal-title {
+      font-size: 2rem;
+    }
+
+    .legal-section h2 {
+      font-size: 1.25rem;
+    }
+
+    .cookies-table {
+      font-size: 0.85rem;
+    }
+
+    .cookies-table th,
+    .cookies-table td {
+      padding: 0.5rem;
+    }
+  }
+</style>

@@ -1,0 +1,104 @@
+---
+import HeroBackgroundSlider from "../home/HeroBackgroundSlider";
+
+// Hero específico para la página de propiedades
+export interface Props {
+  title?: string;
+  subtitle?: string;
+  heroImages?: Array<{ id: number; url: string; order: number }>;
+}
+
+const {
+  title = "Propiedades en venta en Sanlúcar de Barrameda",
+  subtitle = "",
+  heroImages = [],
+} = Astro.props;
+
+// Si no hay imágenes, usar imagen por defecto
+const slides = heroImages.length > 0 ? heroImages : [{
+  id: 0,
+  url: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1920&h=800&fit=crop&q=80",
+  order: 0
+}];
+---
+
+<section class="property-hero">
+  <div class="hero-background">
+    <HeroBackgroundSlider slides={slides} interval={1500} client:load />
+    <div class="hero-overlay"></div>
+  </div>
+
+  <div class="hero-content">
+    <div class="container">
+      <h1 class="hero-title">{title}</h1>
+      {subtitle && <p class="hero-subtitle">{subtitle}</p>}
+    </div>
+  </div>
+</section>
+
+<style>
+  .property-hero {
+    position: relative;
+    height: 820px; /* 🔹 altura principal que quieres */
+    display: flex;
+    align-items: center; /* centra verticalmente el texto */
+    justify-content: center; /* centra horizontalmente */
+    overflow: hidden;
+  }
+
+  .hero-background {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    text-align: center;
+  }
+
+  .hero-title {
+    font-family: "Montserrat", system-ui, sans-serif;
+    font-size: 2.5rem; /* mantenemos el tamaño que ya tenías */
+    font-weight: 600;
+    color: white;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .hero-subtitle {
+    font-size: 1.125rem;
+    color: white;
+    margin: 1rem 0 0 0;
+    opacity: 0.95;
+  }
+
+  @media (max-width: 768px) {
+    .property-hero {
+      height: 420px; /* algo más contenido en móvil */
+    }
+
+    .hero-title {
+      font-size: 1.9rem;
+    }
+
+    .hero-subtitle {
+      font-size: 1rem;
+    }
+  }
+</style>

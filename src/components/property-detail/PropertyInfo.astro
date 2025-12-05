@@ -1,0 +1,250 @@
+---
+// Información principal de la propiedad (precio, ubicación, características)
+export interface Props {
+  price: number;
+  title: string;
+  city: string;
+  neighborhood?: string;
+  operation: 'RENT' | 'SALE';
+  bedrooms?: number;
+  bathrooms?: number;
+  areaM2?: number;
+  propertyType: string;
+}
+
+const {
+  price,
+  title,
+  city,
+  neighborhood,
+  operation,
+  bedrooms,
+  bathrooms,
+  areaM2,
+  propertyType
+} = Astro.props;
+
+const formatPrice = (price: number) => {
+  return new Intl.NumberFormat('es-ES').format(price);
+};
+
+const operationLabel = operation === 'RENT' ? 'Alquiler' : 'Venta';
+const propertyTypeLabels: Record<string, string> = {
+  HOUSE: 'Casa',
+  APARTMENT: 'Piso',
+  DUPLEX: 'Dúplex',
+  PENTHOUSE: 'Ático',
+  STUDIO: 'Estudio',
+  COMMERCIAL: 'Local comercial',
+  OFFICE: 'Oficina',
+  LAND: 'Terreno',
+};
+---
+
+<section class="property-info">
+  <div class="container">
+    <div class="info-grid">
+      <!-- Columna principal -->
+      <div class="main-info">
+        <!-- Precio y operación -->
+        <div class="price-section">
+          <span class="operation-badge">{operationLabel}</span>
+          <h1 class="price">{formatPrice(price)}€<span class="price-period">{operation === 'RENT' ? '/mes' : ''}</span></h1>
+        </div>
+
+        <!-- Título y ubicación -->
+        <h2 class="property-title">{title}</h2>
+        <div class="location">
+          <svg class="location-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+          <span>{city}{neighborhood ? `, ${neighborhood}` : ''}</span>
+        </div>
+
+        <!-- Características principales -->
+        <div class="main-features">
+          <div class="feature-item">
+            <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+            </svg>
+            <div class="feature-content">
+              <span class="feature-label">Tipo</span>
+              <span class="feature-value">{propertyTypeLabels[propertyType] || propertyType}</span>
+            </div>
+          </div>
+
+          {bedrooms && (
+            <div class="feature-item">
+              <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M3 9h18v12H3z"/>
+                <path d="M9 21V9"/>
+                <path d="M15 21V9"/>
+                <path d="M3 6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v3H3V6z"/>
+              </svg>
+              <div class="feature-content">
+                <span class="feature-label">Habitaciones</span>
+                <span class="feature-value">{bedrooms}</span>
+              </div>
+            </div>
+          )}
+
+          {bathrooms && (
+            <div class="feature-item">
+              <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="7" cy="7" r="3"/>
+                <path d="M7 10v11"/>
+                <path d="M21 21v-3a7 7 0 0 0-7-7H7"/>
+              </svg>
+              <div class="feature-content">
+                <span class="feature-label">Baños</span>
+                <span class="feature-value">{bathrooms}</span>
+              </div>
+            </div>
+          )}
+
+          {areaM2 && (
+            <div class="feature-item">
+              <svg class="feature-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+              </svg>
+              <div class="feature-content">
+                <span class="feature-label">Superficie</span>
+                <span class="feature-value">{areaM2} m²</span>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .property-info {
+    padding: 2.5rem 0 2rem;
+    background: white;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .main-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .price-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .operation-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background: #133b34;
+    color: white;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .price {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #133b34;
+    margin: 0;
+    line-height: 1;
+  }
+
+  .price-period {
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: #6a8074;
+  }
+
+  .property-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #39505d;
+    margin: 0;
+    line-height: 1.3;
+  }
+
+  .location {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6a8074;
+    font-size: 1rem;
+  }
+
+  .location-icon {
+    width: 20px;
+    height: 20px;
+    color: #c3a77a;
+  }
+
+  .main-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+  }
+
+  .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .feature-icon {
+    width: 24px;
+    height: 24px;
+    color: #133b34;
+    flex-shrink: 0;
+    stroke-width: 2;
+  }
+
+  .feature-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .feature-label {
+    font-size: 0.875rem;
+    color: #6a8074;
+  }
+
+  .feature-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #39505d;
+  }
+
+  @media (max-width: 768px) {
+    .price {
+      font-size: 2rem;
+    }
+
+    .property-title {
+      font-size: 1.5rem;
+    }
+
+    .main-features {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

@@ -1,0 +1,34 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../../admin/layouts/AdminLayout.astro";
+import AdminSidebar from "../../../admin/components/AdminSidebar.tsx";
+import AdminTopbar from "../../../admin/components/AdminTopbar.tsx";
+import AboutSettingsForm from "../../../admin/components/AboutSettingsForm.tsx";
+import HeroImagesManager from "../../../admin/components/HeroImagesManager.tsx";
+---
+
+<AdminLayout title="Configuración de Sobre Korvalia - Panel Admin">
+  <AdminSidebar client:load currentPath="/admin/settings/about" />
+
+  <div class="admin-main">
+    <AdminTopbar client:load />
+
+    <div class="admin-content">
+      <div class="admin-container">
+        <!-- Imágenes del Hero -->
+        <div style="margin-bottom: 3rem;">
+          <HeroImagesManager client:load pageKey="about" />
+        </div>
+
+        <!-- Configuración de Título -->
+        <AboutSettingsForm client:load />
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  const token = localStorage.getItem("admin_token");
+  if (!token) window.location.href = "/admin/login";
+</script>

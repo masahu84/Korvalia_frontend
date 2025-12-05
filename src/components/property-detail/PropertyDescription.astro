@@ -1,0 +1,53 @@
+---
+// Descripción detallada de la propiedad
+export interface Props {
+  description: string;
+}
+
+const { description } = Astro.props;
+---
+
+<section class="property-description">
+  <div class="container">
+    <h3 class="section-title">Descripción</h3>
+    <div class="description-content">
+      <p>{description}</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .property-description {
+    padding: 2rem 0;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #39505d;
+    margin: 0 0 1.5rem 0;
+  }
+
+  .description-content {
+    max-width: 800px;
+  }
+
+  .description-content p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #6a8074;
+    margin: 0 0 1rem 0;
+  }
+
+  .description-content p:last-child {
+    margin-bottom: 0;
+  }
+</style>

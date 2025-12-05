@@ -1,0 +1,129 @@
+---
+// Hero con imagen grande para detalle de propiedad
+export interface Props {
+  images: string[];
+  title: string;
+}
+
+const { images, title } = Astro.props;
+const mainImage = images[0] || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1920&h=800&fit=crop';
+---
+
+<section class="property-detail-hero">
+  <div class="hero-image-container">
+    <img src={mainImage} alt={title} class="hero-image" />
+    <div class="hero-overlay"></div>
+
+    <!-- Galería de miniaturas (opcional) -->
+    {images.length > 1 && (
+      <div class="thumbnails-wrapper">
+        <div class="thumbnails-container">
+          {images.slice(0, 5).map((img, index) => (
+            <button
+              class="thumbnail"
+              data-index={index}
+              aria-label={`Ver imagen ${index + 1}`}
+            >
+              <img src={img} alt={`${title} - ${index + 1}`} />
+            </button>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .property-detail-hero {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    overflow: hidden;
+    background: #f3f4f6;
+  }
+
+  .hero-image-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hero-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.3));
+  }
+
+  .thumbnails-wrapper {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 0;
+    right: 0;
+    z-index: 10;
+  }
+
+  .thumbnails-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .thumbnail {
+    width: 80px;
+    height: 60px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid white;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: none;
+    padding: 0;
+  }
+
+  .thumbnail:hover {
+    transform: scale(1.05);
+    border-color: #c3a77a;
+  }
+
+  .thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (max-width: 768px) {
+    .property-detail-hero {
+      height: 300px;
+    }
+
+    .thumbnail {
+      width: 60px;
+      height: 45px;
+    }
+  }
+</style>
+
+<script>
+  // Cambiar imagen principal al hacer clic en thumbnail
+  document.addEventListener('DOMContentLoaded', () => {
+    const thumbnails = document.querySelectorAll('.thumbnail');
+    const heroImage = document.querySelector('.hero-image') as HTMLImageElement;
+
+    thumbnails.forEach((thumb) => {
+      thumb.addEventListener('click', () => {
+        const img = thumb.querySelector('img') as HTMLImageElement;
+        if (img && heroImage) {
+          heroImage.src = img.src;
+        }
+      });
+    });
+  });
+</script>

@@ -1,0 +1,204 @@
+---
+// Sección Cómo trabajamos con proceso e imagen
+---
+
+<section class="how-we-work">
+  <div class="container">
+    <div class="work-content">
+      <!-- Columna izquierda: título + subtítulo + descripción + pasos -->
+      <div class="process-column">
+        <header class="process-header">
+          <h2 class="section-title">Cómo trabajamos</h2>
+          <p class="section-subtitle">Nuestro proceso</p>
+          <p class="section-description">
+            Queremos que entiendas cada paso y sientas que todo está bajo control.<br />
+            <strong>Pasos:</strong>
+          </p>
+        </header>
+
+        <div class="process-steps">
+          <div class="process-step">
+            <div class="step-number">1</div>
+            <div class="step-content">
+              <h3 class="step-title">Análisis y preparación de necesidades</h3>
+              <p class="step-description">
+                Analizamos tus necesidades y objetivos para ofrecerte las mejores opciones del mercado.
+              </p>
+            </div>
+          </div>
+
+          <div class="process-step">
+            <div class="step-number">2</div>
+            <div class="step-content">
+              <h3 class="step-title">Visitamos y presentamos la organización del inmueble</h3>
+              <p class="step-description">
+                Te acompañamos en cada visita y te asesoramos sobre las características de cada propiedad.
+              </p>
+            </div>
+          </div>
+
+          <div class="process-step">
+            <div class="step-number">3</div>
+            <div class="step-content">
+              <h3 class="step-title">Propuesta y gestión selectiva de la propiedad</h3>
+              <p class="step-description">Gestionamos toda la documentación y te ayudamos en la negociación.</p>
+            </div>
+          </div>
+
+          <div class="process-step">
+            <div class="step-number">4</div>
+            <div class="step-content">
+              <h3 class="step-title">Gestión, entrega y acompañamiento hasta el cierre</h3>
+              <p class="step-description">
+                Te acompañamos hasta la firma y entrega de llaves, asegurando una experiencia sin complicaciones.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna derecha: imagen pegada abajo y alta -->
+      <div class="image-column">
+        <img src="/como-trabajamos-image.svg" alt="Cómo trabajamos en Korvalia" class="working-image" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .how-we-work {
+    padding: 4rem 0 5rem;
+    background: #dbeaf5;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .work-content {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 3.5rem;
+    align-items: stretch; /* 🔹 ambas columnas misma altura */
+  }
+
+  @media (max-width: 968px) {
+    .work-content {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+  }
+
+  .process-header {
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-family: "Montserrat", system-ui, sans-serif;
+    font-size: 2.1rem;
+    font-weight: 600;
+    color: #39505d;
+    margin: 0 0 0.4rem 0;
+    text-align: left;
+  }
+
+  .section-subtitle {
+    font-size: 1rem;
+    color: #6a8074;
+    margin: 0 0 0.75rem 0;
+    text-align: left;
+  }
+
+  .section-description {
+    font-size: 0.95rem;
+    color: #6a8074;
+    margin: 0;
+    line-height: 1.6;
+    text-align: left;
+  }
+
+  .process-column {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .process-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .process-step {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .step-number {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    background: #133b34;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .step-content {
+    flex: 1;
+  }
+
+  .step-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #39505d;
+    margin: 0 0 0.45rem 0;
+    line-height: 1.4;
+  }
+
+  .step-description {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: #6a8074;
+    margin: 0;
+  }
+
+  /* 🔹 Columna de imagen: ocupa todo el alto del grid y pega la imagen abajo */
+  .image-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* imagen apoyada en el borde inferior */
+    align-items: center;
+  }
+
+  .working-image {
+    max-height: 100%; /* crece hasta casi arriba */
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    display: block;
+  }
+
+  @media (max-width: 968px) {
+    .image-column {
+      justify-content: flex-start; /* en móvil, comportamiento normal */
+      align-items: flex-start;
+    }
+
+    .working-image {
+      max-height: none;
+      width: 100%;
+      height: auto;
+    }
+  }
+</style>

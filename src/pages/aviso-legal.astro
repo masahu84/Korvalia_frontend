@@ -1,0 +1,169 @@
+---
+import MainLayout from "../components/layout/MainLayout.astro";
+
+const API_BASE = import.meta.env.PUBLIC_API_URL || "http://localhost:4000";
+
+let companyName = "Korvalia Inmobiliaria";
+let address = "";
+let email = "";
+let phone = "";
+
+try {
+  const response = await fetch(`${API_BASE}/api/settings`);
+  if (response.ok) {
+    const result = await response.json();
+    const data = result.data || {};
+    companyName = data.companyName || companyName;
+    address = data.address || "";
+    email = data.email || "";
+    phone = data.phone || "";
+  }
+} catch (error) {
+  console.error("Error al cargar datos:", error);
+}
+---
+
+<MainLayout title="Aviso Legal | Korvalia" description="Aviso legal de Korvalia Inmobiliaria">
+  <div class="legal-page">
+    <div class="legal-container">
+      <h1 class="legal-title">Aviso Legal</h1>
+
+      <section class="legal-section">
+        <h2>1. Datos Identificativos</h2>
+        <p>
+          En cumplimiento del artículo 10 de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y Comercio Electrónico, se informa a los usuarios de los datos identificativos del titular de este sitio web:
+        </p>
+        <ul>
+          <li><strong>Titular:</strong> {companyName}</li>
+          {address && <li><strong>Dirección:</strong> {address}</li>}
+          {email && <li><strong>Email:</strong> {email}</li>}
+          {phone && <li><strong>Teléfono:</strong> {phone}</li>}
+        </ul>
+      </section>
+
+      <section class="legal-section">
+        <h2>2. Objeto</h2>
+        <p>
+          El presente aviso legal regula el uso del sitio web {companyName}, del cual es titular {companyName}.
+        </p>
+        <p>
+          La navegación por el sitio web atribuye la condición de usuario del mismo e implica la aceptación plena y sin reservas de todas y cada una de las disposiciones incluidas en este Aviso Legal.
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>3. Condiciones de Uso</h2>
+        <p>El acceso y utilización de este sitio web implica la aceptación de las siguientes condiciones:</p>
+        <ul>
+          <li>El usuario se compromete a hacer un uso adecuado de los contenidos y servicios.</li>
+          <li>Queda prohibido el uso con fines ilícitos o lesivos de los contenidos.</li>
+          <li>El usuario deberá abstenerse de suprimir, alterar o manipular cualquier dispositivo de protección del sitio web.</li>
+        </ul>
+      </section>
+
+      <section class="legal-section">
+        <h2>4. Propiedad Intelectual e Industrial</h2>
+        <p>
+          Todos los contenidos del sitio web, incluyendo textos, fotografías, gráficos, imágenes, iconos, tecnología, software, así como su diseño gráfico y códigos fuente, son propiedad intelectual de {companyName}, sin que puedan entenderse cedidos al usuario ninguno de los derechos de explotación sobre los mismos.
+        </p>
+        <p>
+          Quedan expresamente prohibidas la reproducción, distribución y comunicación pública, incluida su modalidad de puesta a disposición, de la totalidad o parte de los contenidos de esta página web, con fines comerciales, en cualquier soporte y por cualquier medio técnico, sin la autorización expresa de {companyName}.
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>5. Limitación de Responsabilidad</h2>
+        <p>
+          {companyName} no garantiza la licitud, fiabilidad y utilidad de los contenidos que terceros puedan facilitar a través de links o enlaces a otras páginas web.
+        </p>
+        <p>
+          {companyName} se reserva el derecho a efectuar sin previo aviso las modificaciones que considere oportunas en su sitio web, pudiendo cambiar, suprimir o añadir tanto los contenidos y servicios que se presten a través de la misma como la forma en la que éstos aparezcan presentados o localizados.
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>6. Modificaciones</h2>
+        <p>
+          {companyName} se reserva el derecho de efectuar sin previo aviso las modificaciones que considere oportunas en su portal, pudiendo cambiar, suprimir o añadir tanto los contenidos y servicios que se presten a través del mismo como la forma en la que éstos aparezcan presentados o localizados en sus servidores.
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>7. Enlaces</h2>
+        <p>
+          En el caso de que en el sitio web se dispusiesen enlaces o hipervínculos hacia otros sitios de Internet, {companyName} no ejercerá ningún tipo de control sobre dichos sitios y contenidos.
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>8. Legislación Aplicable</h2>
+        <p>
+          La relación entre {companyName} y el usuario se regirá por la normativa española vigente. En caso de controversia, las partes podrán someter sus conflictos a arbitraje o acudir a la jurisdicción ordinaria.
+        </p>
+      </section>
+    </div>
+  </div>
+</MainLayout>
+
+<style>
+  .legal-page {
+    background: #ffffff;
+    min-height: calc(100vh - 200px);
+    padding: 4rem 0;
+  }
+
+  .legal-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .legal-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .legal-section {
+    margin-bottom: 2.5rem;
+  }
+
+  .legal-section h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #39505d;
+    margin-bottom: 1rem;
+  }
+
+  .legal-section p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #4b5563;
+    margin-bottom: 1rem;
+  }
+
+  .legal-section ul {
+    list-style: disc;
+    padding-left: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .legal-section li {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #4b5563;
+    margin-bottom: 0.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .legal-title {
+      font-size: 2rem;
+    }
+
+    .legal-section h2 {
+      font-size: 1.25rem;
+    }
+  }
+</style>

@@ -1,0 +1,25 @@
+---
+export const prerender = false;
+
+import AuthLayout from "../../admin/layouts/AuthLayout.astro";
+import LoginForm from "../../admin/components/LoginForm";
+
+// Si ya está autenticado, redirigir al dashboard
+if (Astro.request.headers.get("cookie")?.includes("admin_token")) {
+  return Astro.redirect("/admin/dashboard");
+}
+---
+
+<AuthLayout title="Login - Panel Admin">
+  <LoginForm client:load />
+</AuthLayout>
+
+<script>
+  // Verificar si ya está autenticado al cargar la página
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("admin_token");
+    if (token) {
+      window.location.href = "/admin/dashboard";
+    }
+  }
+</script>

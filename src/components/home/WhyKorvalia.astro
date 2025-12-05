@@ -1,0 +1,317 @@
+---
+// Sección ¿Por qué Korvalia? con imagen y beneficios
+---
+
+<section class="why-korvalia">
+  <div class="container">
+    <h2 class="section-title">¿Por qué Korvalia?</h2>
+    <p class="section-subtitle">Un enfoque diferente en Sanlúcar</p>
+
+    <div class="why-content">
+      <!-- Beneficios -->
+      <div class="benefits-column">
+        <div class="benefit-card">
+          <h3 class="benefit-title">Trabajamos con un método claro y una filosofía sencilla:</h3>
+          <p class="benefit-text">
+            Transparencia, acompañamiento y una selección de inmuebles basada en criterios reales de calidad.
+          </p>
+          <p class="benefit-description">
+            Queremos que cada persona se sienta tranquila y bien informada en todo momento.
+          </p>
+          <button class="benefit-button">
+            <span class="button-text">Contacta con nosotros</span>
+            <!-- <span class="button-icon">R</span> -->
+          </button>
+        </div>
+      </div>
+
+      <!-- Imagen de ejemplo -->
+      <div class="image-column">
+        <div class="image-wrapper">
+          <div class="image-inner">
+            <img
+              src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=900&h=700&fit=crop&q=80"
+              alt="Nuestra agencia"
+              class="main-image"
+            />
+          </div>
+
+          <!-- Tarjetas flotantes (ahora sobresalen hacia fuera) -->
+          <div class="floating-card floating-card-1">
+            <p class="floating-card-text">Transparencia en cada paso.</p>
+          </div>
+          <div class="floating-card floating-card-2">
+            <span class="floating-icon">🏠</span>
+            <p class="floating-card-text">Selección real de inmuebles cuidada.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* SECTION: fondo superior celeste + parte inferior blanca */
+  .why-korvalia {
+    position: relative;
+    z-index: 0;
+    padding: 4rem 0 5rem;
+    background: #ffffff;
+  }
+
+  .why-korvalia::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    top: 0;
+    height: 200px;
+    background: #dbeaf5;
+    z-index: -1;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .section-title {
+    font-family: "Montserrat", system-ui, sans-serif;
+    font-size: 2.25rem;
+    font-weight: 600;
+    color: #39505d;
+    text-align: center;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .section-subtitle {
+    font-size: 1rem;
+    color: #6a8074;
+    text-align: center;
+    margin: 0 0 2.5rem 0;
+  }
+
+  /* Layout FLEX para poder alinear verticalmente */
+  .why-content {
+    display: flex;
+    align-items: center; /* card centrada respecto a la imagen */
+    justify-content: center;
+    gap: 0; /* sin hueco entre card e imagen */
+    margin-top: 8.5rem;
+  }
+
+  @media (max-width: 968px) {
+    .why-content {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 3rem;
+      margin-top: 2.5rem;
+    }
+
+    .image-column {
+      order: -1;
+    }
+  }
+
+  .benefits-column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-right: -1.25rem; /* empuja la card hacia la imagen */
+  }
+
+  .benefit-card {
+    background: #c8dce8;
+    padding: 2.5rem 2.25rem;
+    border-radius: 16px;
+    min-height: 330px;
+    max-width: 430px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+
+  .benefit-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #39505d;
+    margin: 0 0 0.75rem 0;
+  }
+
+  .benefit-text {
+    font-size: 0.98rem;
+    color: #39505d;
+    font-weight: 500;
+    margin: 0 0 0.75rem 0;
+  }
+
+  .benefit-description {
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: #6a8074;
+    margin: 0 0 1rem 0;
+  }
+
+  .benefit-button {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 1.5rem;
+    background: #39505d;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    transition: background 0.2s;
+    margin-top: 1rem;
+    align-self: flex-start;
+    cursor: pointer;
+  }
+
+  .benefit-button:hover {
+    background: #2d3f4a;
+  }
+
+  .button-text {
+    flex: 1;
+  }
+
+  .button-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: #f4d03f;
+    color: #39505d;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+  }
+
+  .image-column {
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .image-wrapper {
+    position: relative;
+    height: 520px; /* imagen alargada */
+    max-width: 540px;
+    width: 100%;
+  }
+
+  @media (max-width: 1200px) {
+    .image-wrapper {
+      height: 480px;
+    }
+  }
+
+  .image-inner {
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+    width: 100%;
+    height: 100%;
+  }
+
+  .main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* 🔼 Etiquetas flotantes más anchas */
+  .floating-card {
+    position: absolute;
+    background: white;
+    padding: 0.9rem 1.6rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    max-width: 280px;
+    width: 260px; /* más width */
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  /* 🔁 Arriba a la IZQUIERDA, sobresaliendo */
+  .floating-card-1 {
+    top: 12%;
+    left: -8%;
+    right: auto;
+  }
+
+  /* 🔁 Abajo a la DERECHA, sobresaliendo */
+  .floating-card-2 {
+    bottom: 10%;
+    right: -8%;
+    left: auto;
+  }
+
+  @media (max-width: 968px) {
+    .benefits-column {
+      align-items: center;
+      margin-right: 0;
+    }
+
+    .image-column {
+      justify-content: center;
+    }
+
+    .image-wrapper {
+      height: 380px;
+      max-width: 100%;
+    }
+
+    /* en móvil las metemos un poco más hacia dentro para que no se corten demasiado */
+    .floating-card-1 {
+      top: 6%;
+      left: 6%;
+      right: auto;
+    }
+
+    .floating-card-2 {
+      bottom: 8%;
+      right: 6%;
+      left: auto;
+    }
+  }
+
+  .floating-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: #39505d;
+    border-radius: 50%;
+    font-size: 1.25rem;
+    color: #ffffff;
+    flex-shrink: 0;
+  }
+
+  .floating-card-text {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #39505d;
+    margin: 0;
+    line-height: 1.4;
+  }
+</style>
+
+<script>
+  // Agregar funcionalidad al botón de contacto
+  document.addEventListener("DOMContentLoaded", () => {
+    const contactBtn = document.querySelector(".benefit-button");
+    if (contactBtn) {
+      contactBtn.addEventListener("click", () => {
+        window.location.href = "/contacto";
+      });
+    }
+  });
+</script>

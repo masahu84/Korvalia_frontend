@@ -1,0 +1,193 @@
+---
+// Sección de misión y valores con imagen
+---
+
+<section class="mission-values">
+  <div class="container">
+    <div class="mission-grid">
+      <!-- Imagen -->
+      <div class="image-column">
+        <div class="image-wrapper">
+          <img
+            src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&h=700&fit=crop&q=80"
+            alt="Nuestros valores"
+            class="mission-image"
+          />
+        </div>
+      </div>
+
+      <!-- Contenido -->
+      <div class="content-column">
+        <h2 class="section-title">Nuestra filosofía</h2>
+
+        <div class="values-list">
+          <div class="value-item">
+            <div class="value-icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+            </div>
+            <div class="value-content">
+              <h3 class="value-title">Transparencia</h3>
+              <p class="value-description">
+                Trabajamos con un método claro y honesto en cada paso del proceso, sin sorpresas ni letra pequeña.
+              </p>
+            </div>
+          </div>
+
+          <div class="value-item">
+            <div class="value-icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              </svg>
+            </div>
+            <div class="value-content">
+              <h3 class="value-title">Atención personalizada</h3>
+              <p class="value-description">
+                Cada cliente es único. Nos tomamos el tiempo de entender tus necesidades y objetivos.
+              </p>
+            </div>
+          </div>
+
+          <div class="value-item">
+            <div class="value-icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+              </svg>
+            </div>
+            <div class="value-content">
+              <h3 class="value-title">Conocimiento local</h3>
+              <p class="value-description">
+                Expertos en el mercado de Sanlúcar con más de 20 años de experiencia en la zona.
+              </p>
+            </div>
+          </div>
+
+          <div class="value-item">
+            <div class="value-icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+              </svg>
+            </div>
+            <div class="value-content">
+              <h3 class="value-title">Compromiso</h3>
+              <p class="value-description">
+                Tu satisfacción es nuestra prioridad. Te acompañamos en cada paso hasta encontrar tu hogar ideal.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .mission-values {
+    padding: 4rem 0 5rem;
+    background: #f7f2ec;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .mission-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  @media (max-width: 968px) {
+    .mission-grid {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+
+    .image-column {
+      order: -1;
+    }
+  }
+
+  .image-wrapper {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  }
+
+  .mission-image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .content-column {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .section-title {
+    font-family: "Montserrat", system-ui, sans-serif;
+    font-size: 2.25rem;
+    font-weight: 600;
+    color: #39505d;
+    margin: 0;
+  }
+
+  .values-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .value-item {
+    display: flex;
+    gap: 1.25rem;
+    align-items: flex-start;
+  }
+
+  .value-icon {
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    background: #133b34;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .value-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .value-content {
+    flex: 1;
+  }
+
+  .value-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #39505d;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .value-description {
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: #6a8074;
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .section-title {
+      font-size: 1.75rem;
+    }
+  }
+</style>

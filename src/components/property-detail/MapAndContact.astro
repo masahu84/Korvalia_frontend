@@ -1,0 +1,342 @@
+---
+import PropertyMapClient from "./PropertyMapClient";
+
+export interface Props {
+  propertyTitle: string;
+  propertyId: number;
+  city: string;
+  latitude?: number;
+  longitude?: number;
+  neighborhood?: string;
+}
+
+const { propertyTitle, propertyId, city, latitude, longitude, neighborhood } = Astro.props;
+
+// Coordenadas por defecto (Sanlúcar de Barrameda)
+const defaultLat = 36.7755;
+const defaultLng = -6.3515;
+---
+
+<section class="map-contact-section">
+  <div class="container">
+    <div class="map-contact-grid">
+      <!-- Columna izquierda: Mapa -->
+      <div class="map-column">
+        <div class="map-wrapper">
+          <PropertyMapClient
+            client:only="react"
+            lat={latitude || defaultLat}
+            lng={longitude || defaultLng}
+            title={propertyTitle}
+            city={city}
+            neighborhood={neighborhood}
+          />
+        </div>
+      </div>
+
+      <!-- Columna derecha: Formulario -->
+      <div class="form-column">
+        <div class="contact-card">
+          <!-- Cabecera agente -->
+          <div class="agent-header">
+            <div class="agent-badge">R</div>
+            <div class="agent-header-text">
+              <p class="agent-header-name">Merche Silva</p>
+              <p class="agent-header-role">Ceo</p>
+            </div>
+          </div>
+
+          <form class="contact-form" id="property-contact-form-map">
+            <input type="hidden" name="propertyId" value={propertyId} />
+            <input type="hidden" name="propertyTitle" value={propertyTitle} />
+
+            <div class="form-group">
+              <input type="text" id="contact-name-2" name="name" class="form-input" placeholder="Nombre" required />
+            </div>
+
+            <div class="form-group">
+              <input type="tel" id="contact-phone-2" name="phone" class="form-input" placeholder="Número de teléfono" />
+            </div>
+
+            <div class="form-group">
+              <input type="email" id="contact-email-2" name="email" class="form-input" placeholder="Email" required />
+            </div>
+
+            <div class="form-group">
+              <textarea
+                id="contact-message-2"
+                name="message"
+                class="form-textarea"
+                rows="3"
+                placeholder="¡Hola! Estoy interesad@ en esta propiedad..."></textarea>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn-send">Enviar</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .map-contact-section {
+    padding: 3.5rem 0;
+    background: white;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .map-contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: stretch; /* ✅ esto hace que ambos lados tengan la misma altura */
+  }
+
+  @media (max-width: 968px) {
+    .map-contact-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* MAPA */
+  .map-column {
+    display: flex;
+  }
+
+  .map-wrapper {
+    position: relative;
+    width: 100%;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    background: #e5e7eb;
+    height: 100%; /* ✅ iguala altura al contacto */
+    z-index: 1; /* Evita que el mapa pase por encima del header */
+  }
+
+  :global(.property-map-leaflet) {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* FORMULARIO */
+  .form-column {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .contact-card {
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+    padding: 1.75rem 1.75rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    height: 100%; /* ✅ fuerza que marque la altura de la fila */
+  }
+
+  .agent-header {
+    position: relative;
+    background: #f3f4f6;
+    border-radius: 12px;
+    padding: 0.9rem 0.9rem 0.9rem 3.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .agent-badge {
+    position: absolute;
+    left: 0.9rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    background: #f4d03f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #39505d;
+    font-size: 1rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  }
+
+  .agent-header-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .agent-header-name {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .agent-header-role {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #6b7280;
+  }
+
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-input,
+  .form-textarea {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    font-size: 0.95rem;
+    color: #374151;
+    background: #ffffff;
+    transition:
+      border-color 0.2s,
+      box-shadow 0.2s;
+  }
+
+  .form-input::placeholder,
+  .form-textarea::placeholder {
+    color: #9ca3af;
+  }
+
+  .form-input:focus,
+  .form-textarea:focus {
+    outline: none;
+    border-color: #133b34;
+    box-shadow: 0 0 0 3px rgba(19, 59, 52, 0.12);
+  }
+
+  .form-textarea {
+    min-height: 90px;
+    resize: vertical;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: center; /* ✅ botón centrado */
+    margin-top: 0.75rem;
+  }
+
+  .btn-send {
+    padding: 0.9rem 2.5rem;
+    border-radius: 10px;
+    border: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    background: #39505d;
+    color: #ffffff;
+    transition:
+      transform 0.15s,
+      box-shadow 0.15s,
+      background 0.15s;
+  }
+
+  .btn-send:hover {
+    background: #2d3f4a;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(57, 80, 93, 0.35);
+  }
+
+  @media (max-width: 640px) {
+    .map-wrapper {
+      height: 320px; /* altura razonable en móvil */
+    }
+  }
+
+  /* Estilos para el popup del mapa */
+  :global(.property-map-popup) {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.5rem;
+  }
+
+  :global(.property-map-popup .popup-icon) {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    background: #133b34;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+
+  :global(.property-map-popup .popup-icon svg) {
+    width: 20px;
+    height: 20px;
+  }
+
+  :global(.property-map-popup .popup-text) {
+    flex: 1;
+  }
+
+  :global(.property-map-popup .popup-title) {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0 0 0.25rem 0;
+    line-height: 1.3;
+  }
+
+  :global(.property-map-popup .popup-location) {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin: 0;
+  }
+
+  :global(.custom-property-marker) {
+    background: transparent !important;
+    border: none !important;
+  }
+
+  :global(.leaflet-popup-content-wrapper) {
+    border-radius: 12px !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  :global(.leaflet-popup-content) {
+    margin: 8px 12px !important;
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("property-contact-form-map");
+
+    if (form) {
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form as HTMLFormElement);
+        const data = Object.fromEntries(formData);
+
+        console.log("Formulario enviado (Enviar):", data);
+        // Aquí luego conectarás con el backend si quieres
+      });
+    }
+  });
+</script>

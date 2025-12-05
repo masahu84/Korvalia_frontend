@@ -1,0 +1,34 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../../admin/layouts/AdminLayout.astro";
+import AdminSidebar from "../../../admin/components/AdminSidebar.tsx";
+import AdminTopbar from "../../../admin/components/AdminTopbar.tsx";
+import HomeSettingsForm from "../../../admin/components/HomeSettingsForm.tsx";
+import HeroImagesManager from "../../../admin/components/HeroImagesManager.tsx";
+---
+
+<AdminLayout title="Configuración de Home - Panel Admin">
+  <AdminSidebar client:load currentPath="/admin/settings/home" />
+
+  <div class="admin-main">
+    <AdminTopbar client:load />
+
+    <div class="admin-content">
+      <div class="admin-container">
+        <!-- Imágenes del Hero -->
+        <div style="margin-bottom: 3rem;">
+          <HeroImagesManager client:load />
+        </div>
+
+        <!-- Configuración de Página Home -->
+        <HomeSettingsForm client:load />
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  const token = localStorage.getItem("admin_token");
+  if (!token) window.location.href = "/admin/login";
+</script>

@@ -1,0 +1,62 @@
+---
+import HeroBackgroundSlider from "./HeroBackgroundSlider";
+
+// Cargar configuración de la página Home y las imágenes del hero desde el backend
+const API_BASE = import.meta.env.PUBLIC_API_URL || "http://localhost:4000";
+
+// Cargar título desde PageSettings
+let title = "Una nueva forma de vivir y de vender en Sanlúcar";
+try {
+  const settingsResponse = await fetch(`${API_BASE}/api/pages/home`);
+  if (settingsResponse.ok) {
+    const settingsData = await settingsResponse.json();
+    if (settingsData.data?.title) {
+      title = settingsData.data.title;
+    }
+  }
+} catch (error) {
+  console.error("Error loading page settings:", error);
+}
+
+// Cargar imágenes del hero
+let heroImages: Array<{ id: number; url: string; order: number }> = [];
+try {
+  const response = await fetch(`${API_BASE}/api/hero-images/active`);
+  if (response.ok) {
+    const data = await response.json();
+    // Obtener las imágenes activas y ordenarlas
+    heroImages = (data.data || []).sort((a: any, b: any) => a.order - b.order);
+  }
+} catch (error) {
+  console.error("Error loading hero images:", error);
+}
+
+// Si no hay imágenes, usar imagen por defecto
+if (heroImages.length === 0) {
+  heroImages = [{
+    id: 0,
+    url: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1920&h=1080&fit=crop",
+    order: 0
+  }];
+}
+---
+
+<section class="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
+  <!-- Fondo: slider dinámico con imágenes del admin -->
+  <HeroBackgroundSlider slides={heroImages} interval={1500} client:load />
+
+  <!-- Overlay oscuro para mejorar contraste del texto -->
+  <div class="absolute inset-0 bg-black/50"></div>
+
+  <!-- Contenido -->
+  <div class="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="flex flex-col items-center text-center">
+      <!-- Título principal -->
+      <h1
+        class="text-white font-heading font-bold text-[48px] md:text-[64px] lg:text-[72px] leading-[1.1] max-w-4xl drop-shadow-2xl"
+      >
+        {title}
+      </h1>
+    </div>
+  </div>
+</section>

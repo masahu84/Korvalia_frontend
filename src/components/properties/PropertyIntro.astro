@@ -1,0 +1,45 @@
+---
+// Sección de introducción para la página de propiedades
+---
+
+<section class="property-intro">
+  <div class="container">
+    <p class="intro-text">
+      Explora una selección de inmuebles que<br class="hidden sm:block" />
+      representan nuestro estándar de calidad
+    </p>
+  </div>
+</section>
+
+<style>
+  .property-intro {
+    padding: 4.5rem 0 3.5rem; /* más altura */
+    background: white;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+    text-align: center;
+  }
+
+  .intro-text {
+    font-size: 1.5rem; /* texto más grande */
+    line-height: 1.7;
+    color: #39505d;
+    margin: 0;
+    font-weight: 400;
+  }
+
+  @media (max-width: 640px) {
+    .property-intro {
+      padding: 3rem 0 2.25rem; /* también algo más alta en móvil */
+    }
+
+    .intro-text {
+      font-size: 1.2rem;
+      line-height: 1.6;
+    }
+  }
+</style>

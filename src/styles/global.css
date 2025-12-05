@@ -1,0 +1,164 @@
+/* Importar fuentes de Google Fonts - DEBE IR PRIMERO */
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap");
+
+/* Importar Tailwind v4 */
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/preflight" layer(base);
+@import "tailwindcss/utilities" layer(utilities);
+
+/* Configuración del tema de Tailwind v4 */
+@theme {
+  --font-sans: Montserrat, system-ui, sans-serif;
+  --font-heading: Montserrat, system-ui, sans-serif;
+  --font-button: DM Sans, system-ui, sans-serif;
+
+  --color-brand-primary: #133b34;
+  --color-brand-secondary: #39505d;
+  --color-brand-muted: #6a8074;
+  --color-brand-accent: #c3a77a;
+  --color-brand-background: #f7f2ec;
+}
+
+/* Variables CSS para compatibilidad */
+:root {
+  --brand-primary: #133b34;
+  --brand-secondary: #39505d;
+  --brand-muted: #6a8074;
+  --brand-accent: #c3a77a;
+  --brand-background: #f7f2ec;
+}
+
+/* Estilos base */
+@layer base {
+  html {
+    font-size: 16px;
+  }
+
+  body {
+    margin: 0;
+    font-family: "Montserrat", system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    background-color: var(--brand-background);
+    color: var(--brand-primary);
+  }
+
+  h1 {
+    font-family: "Montserrat", system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 48px;
+    line-height: 1.2;
+    color: var(--brand-primary);
+  }
+
+  h2 {
+    font-family: "Montserrat", system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 38px;
+    line-height: 1.2;
+    color: var(--brand-primary);
+  }
+
+  h3 {
+    font-family: "Montserrat", system-ui, sans-serif;
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 1.3;
+    color: var(--brand-primary);
+  }
+
+  p {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* Responsive para títulos en móvil */
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 32px;
+    }
+    h2 {
+      font-size: 28px;
+    }
+    h3 {
+      font-size: 16px;
+    }
+  }
+}
+
+/* Componentes personalizados (sin @apply) */
+@layer components {
+  .btn-primary {
+    font-family: "DM Sans", system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 0.75rem 2rem; /* py-3 px-8 */
+    border-radius: 0.75rem; /* rounded-xl */
+    border: none;
+    cursor: pointer;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: var(--brand-primary);
+    color: #ffffff;
+
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary:hover {
+    background-color: var(--brand-secondary);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(19, 59, 52, 0.3);
+  }
+
+  .btn-secondary {
+    font-family: "DM Sans", system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 0.75rem 2rem;
+    border-radius: 0.75rem;
+    border: none;
+    cursor: pointer;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: var(--brand-accent);
+    color: var(--brand-primary);
+
+    transition: all 0.3s ease;
+  }
+
+  .btn-secondary:hover {
+    background-color: #b89666;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(195, 167, 122, 0.3);
+  }
+
+  .btn-outline {
+    font-family: "DM Sans", system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 0.75rem 2rem;
+    border-radius: 0.75rem;
+    cursor: pointer;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 2px solid var(--brand-primary);
+    background-color: transparent;
+    color: var(--brand-primary);
+
+    transition: all 0.3s ease;
+  }
+
+  .btn-outline:hover {
+    background-color: var(--brand-primary);
+    color: #ffffff;
+  }
+}

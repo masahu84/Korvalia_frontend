@@ -1,0 +1,36 @@
+---
+import MainLayout from '../components/layout/MainLayout.astro';
+import AboutHero from '../components/about/AboutHero.astro';
+import WhoWeAre from '../components/about/WhoWeAre.astro';
+import AboutContent from '../components/about/AboutContent.astro';
+import ValueCards from '../components/about/ValueCards.astro';
+import VisionSection from '../components/about/VisionSection.astro';
+import ShowcaseImages from '../components/about/ShowcaseImages.astro';
+import FinalCTA from '../components/home/FinalCTA';
+---
+
+<MainLayout
+  title="Sobre Nosotros | Korvalia"
+  description="Conoce la historia de Korvalia, nuestra filosofía y el equipo que hace posible tu sueño de encontrar el hogar perfecto en Sanlúcar de Barrameda."
+>
+  <!-- Hero: Te ayudamos a buscar tu nuevo hogar -->
+  <AboutHero />
+
+  <!-- ¿Quiénes somos? (fondo celeste) -->
+  <WhoWeAre />
+
+  <!-- Contenido: Texto + Imagen casa -->
+  <AboutContent />
+
+  <!-- 4 tarjetas de valores -->
+  <ValueCards />
+
+  <!-- La visión -->
+  <VisionSection />
+
+  <!-- Imagen grande + Galería de 6 casas -->
+  <ShowcaseImages />
+
+  <!-- CTA Final -->
+  <FinalCTA client:load />
+</MainLayout>

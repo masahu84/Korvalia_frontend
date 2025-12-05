@@ -1,0 +1,28 @@
+---
+/**
+ * Página de redirección del admin
+ * Redirige a /admin/dashboard si está autenticado, sino a /admin/login
+ */
+export const prerender = false;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Redirigiendo...</title>
+  </head>
+  <body>
+    <script>
+      // Verificar si está autenticado
+      const token = localStorage.getItem("admin_token");
+
+      if (token) {
+        window.location.href = "/admin/dashboard";
+      } else {
+        window.location.href = "/admin/login";
+      }
+    </script>
+  </body>
+</html>

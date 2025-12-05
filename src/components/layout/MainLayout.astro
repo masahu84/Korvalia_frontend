@@ -1,0 +1,34 @@
+---
+import Header from "./Header.astro";
+import Footer from "./Footer.astro";
+import "../../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Korvalia - Tu inmobiliaria de confianza",
+  description = "Encuentra tu hogar ideal. Las mejores propiedades en las mejores ubicaciones.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/logo.png" />
+    <title>{title}</title>
+    <slot name="head" />
+  </head>
+  <body class="min-h-screen flex flex-col bg-gray-50">
+    <Header />
+    <main class="flex-grow">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

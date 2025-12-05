@@ -1,0 +1,27 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../../admin/layouts/AdminLayout.astro";
+import AdminSidebar from "../../../admin/components/AdminSidebar.tsx";
+import AdminTopbar from "../../../admin/components/AdminTopbar.tsx";
+import CitiesManager from "../../../admin/components/CitiesManager.tsx";
+---
+
+<AdminLayout title="Gestión de Ciudades - Panel Admin">
+  <AdminSidebar client:load currentPath="/admin/properties/cities" />
+
+  <div class="admin-main">
+    <AdminTopbar client:load />
+
+    <div class="admin-content">
+      <div class="admin-container">
+        <CitiesManager client:load />
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  const token = localStorage.getItem("admin_token");
+  if (!token) window.location.href = "/admin/login";
+</script>

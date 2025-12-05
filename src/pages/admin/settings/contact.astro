@@ -1,0 +1,32 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../../admin/layouts/AdminLayout.astro";
+import AdminSidebar from "../../../admin/components/AdminSidebar.tsx";
+import AdminTopbar from "../../../admin/components/AdminTopbar.tsx";
+import ContactSettingsForm from "../../../admin/components/ContactSettingsForm.tsx";
+---
+
+<AdminLayout title="Configuración de Contacto - Panel Admin">
+  <AdminSidebar client:load currentPath="/admin/settings/contact" />
+
+  <div class="admin-main">
+    <AdminTopbar client:load />
+
+    <div class="admin-content">
+      <div class="admin-container">
+        <div class="admin-page-header">
+          <h1 class="admin-page-title">Página de Contacto</h1>
+          <p class="admin-page-subtitle">Configura la imagen que aparece en la página de contacto</p>
+        </div>
+
+        <ContactSettingsForm client:load />
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  const token = localStorage.getItem("admin_token");
+  if (!token) window.location.href = "/admin/login";
+</script>

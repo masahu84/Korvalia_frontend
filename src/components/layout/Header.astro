@@ -1,0 +1,112 @@
+---
+// Header con logo a la izquierda y menú a la derecha
+const API_BASE = import.meta.env.PUBLIC_API_URL || "http://localhost:4000";
+
+// Cargar datos de la empresa
+let companyName = "Korvalia Inmobiliaria";
+let logoUrl = "/logo.png";
+
+try {
+  const response = await fetch(`${API_BASE}/api/settings`);
+  if (response.ok) {
+    const result = await response.json();
+    const data = result.data || {};
+
+    if (data.companyName) {
+      companyName = data.companyName;
+    }
+
+    if (data.logoUrl) {
+      // Construir URL completa del logo
+      if (data.logoUrl.startsWith("http://") || data.logoUrl.startsWith("https://")) {
+        logoUrl = data.logoUrl;
+      } else {
+        logoUrl = data.logoUrl.startsWith("/") ? `${API_BASE}${data.logoUrl}` : `${API_BASE}/${data.logoUrl}`;
+      }
+    }
+  }
+} catch (error) {
+  console.error("Error al cargar datos de la empresa:", error);
+}
+---
+
+<header class="bg-white shadow-sm sticky top-0 z-50 border-b border-brand-background">
+  <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-20">
+
+      <!-- Izquierda: Logo -->
+      <div class="flex items-center">
+        <a href="/" class="flex items-center space-x-3">
+          <img src={logoUrl} alt={companyName} class="h-12 w-auto" />
+        </a>
+      </div>
+
+      <!-- Derecha: Menú de Navegación (Desktop) -->
+      <div class="hidden md:flex items-center space-x-8">
+        <a
+          href="/propiedades"
+          class="font-sans text-[16px] font-medium text-brand-secondary hover:text-brand-primary transition"
+        >
+          Propiedades
+        </a>
+        <a
+          href="/sobre-nosotros"
+          class="font-sans text-[16px] font-medium text-brand-secondary hover:text-brand-primary transition"
+        >
+          Sobre Korvalia
+        </a>
+        <a
+          href="/contacto"
+          class="font-sans text-[16px] font-medium text-brand-secondary hover:text-brand-primary transition"
+        >
+          Contacto
+        </a>
+      </div>
+
+      <!-- Mobile Menu Button -->
+      <button
+        id="mobile-menu-button"
+        class="md:hidden text-brand-secondary hover:text-brand-primary focus:outline-none"
+        aria-label="Abrir menú"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden md:hidden pb-4 border-t border-brand-background mt-2 pt-4">
+      <div class="flex flex-col space-y-3">
+        <a
+          href="/propiedades"
+          class="font-sans text-[16px] font-medium text-brand-secondary hover:text-brand-primary transition py-2"
+        >
+          Propiedades
+        </a>
+        <a
+          href="/sobre-nosotros"
+          class="font-sans text-[16px] font-medium text-brand-secondary hover:text-brand-primary transition py-2"
+        >
+          Sobre Korvalia
+        </a>
+        <a
+          href="/contacto"
+          class="font-sans text-[16px] font-medium text-brand-secondary hover:text-brand-primary transition py-2"
+        >
+          Contacto
+        </a>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<script>
+  // Toggle mobile menu
+  const menuButton = document.getElementById("mobile-menu-button");
+  const mobileMenu = document.getElementById("mobile-menu");
+
+  menuButton?.addEventListener("click", () => {
+    mobileMenu?.classList.toggle("hidden");
+  });
+</script>

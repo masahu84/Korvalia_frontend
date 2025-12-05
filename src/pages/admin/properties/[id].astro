@@ -1,0 +1,33 @@
+---
+/**
+ * Editar Propiedad Existente
+ * Usa el componente React PropertyForm.tsx en modo edición
+ */
+export const prerender = false;
+
+import AdminLayout from "../../../admin/layouts/AdminLayout.astro";
+import AdminSidebar from "../../../admin/components/AdminSidebar.tsx";
+import AdminTopbar from "../../../admin/components/AdminTopbar.tsx";
+import PropertyForm from "../../../admin/components/PropertyForm";
+
+const { id } = Astro.params;
+---
+
+<AdminLayout title="Editar Propiedad - Panel Admin">
+  <AdminSidebar client:load currentPath="/admin/properties" />
+
+  <div class="admin-main">
+    <AdminTopbar client:load />
+
+    <div class="admin-content">
+      <div class="admin-container">
+        <PropertyForm client:load propertyId={id ? parseInt(id) : undefined} />
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  const token = localStorage.getItem("admin_token");
+  if (!token) window.location.href = "/admin/login";
+</script>

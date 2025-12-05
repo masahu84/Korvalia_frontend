@@ -1,0 +1,369 @@
+---
+import MainLayout from "../components/layout/MainLayout.astro";
+import PropertyHero from "../components/properties/PropertyHero.astro";
+import PropertyIntro from "../components/properties/PropertyIntro.astro";
+import PropertyFilters from "../components/properties/PropertyFilters";
+import PropertyGrid from "../components/properties/PropertyGrid";
+import ZoneMap from "../components/properties/ZoneMap.astro";
+import FinalCTA from "../components/home/FinalCTA";
+import type { Property } from "../types/property";
+
+const API_BASE = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
+
+// Placeholder para propiedades sin imagen
+const PLACEHOLDER_IMAGE = "https://placehold.co/800x600/e5e7eb/9ca3af?text=Sin+imagen";
+
+// Helper para construir URLs completas de imágenes
+function getImageUrl(url: string): string {
+  if (!url) return PLACEHOLDER_IMAGE;
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+  return url.startsWith("/") ? `${API_BASE}${url}` : `${API_BASE}/${url}`;
+}
+
+// Obtener configuración de la página desde la base de datos
+let heroTitle = "Propiedades en venta en Sanlúcar de Barrameda";
+let heroImages: any[] = [];
+
+try {
+  const pageSettingsRes = await fetch(`${API_BASE}/api/pages/properties`);
+  if (pageSettingsRes.ok) {
+    const pageData = await pageSettingsRes.json();
+    if (pageData.data?.title) {
+      heroTitle = pageData.data.title;
+    }
+  }
+
+  const heroImagesRes = await fetch(`${API_BASE}/api/hero-images?pageKey=properties`);
+  if (heroImagesRes.ok) {
+    const imagesData = await heroImagesRes.json();
+    heroImages = imagesData.data || [];
+  }
+} catch (error) {
+  console.error("Error al obtener configuración del hero", error);
+}
+
+// Obtener parámetros de búsqueda de la URL
+const url = new URL(Astro.request.url);
+const operation = url.searchParams.get("operation") || url.searchParams.get("op");
+const city = url.searchParams.get("city");
+const priceRange = url.searchParams.get("price");
+const searchQuery = url.searchParams.get("q");
+const isFeatured = url.searchParams.get("featured") === "true";
+const propertyType = url.searchParams.get("propertyType");
+const areaRange = url.searchParams.get("area");
+const page = parseInt(url.searchParams.get("page") || "1");
+const limit = 6;
+const offset = (page - 1) * limit;
+
+let properties: Property[] = [];
+let totalResults = 0;
+
+try {
+  // Construir URL con parámetros de búsqueda
+  const params = new URLSearchParams();
+  params.append("status", "ACTIVE");
+  params.append("limit", limit.toString());
+  params.append("offset", offset.toString());
+
+  if (isFeatured) {
+    params.append("isFeatured", "true");
+  }
+  if (searchQuery) {
+    params.append("search", searchQuery);
+  }
+  if (operation) {
+    params.append("operation", operation);
+  }
+  if (city) {
+    params.append("city", city);
+  }
+  if (priceRange) {
+    params.append("priceRange", priceRange);
+  }
+  if (propertyType) {
+    params.append("propertyType", propertyType);
+  }
+  if (areaRange) {
+    params.append("areaRange", areaRange);
+  }
+
+  const res = await fetch(`${API_BASE}/api/properties?${params.toString()}`);
+  if (res.ok) {
+    const json = await res.json();
+    const propertiesData = json.data?.properties || json.properties || json.data || [];
+    totalResults = json.data?.total || propertiesData.length;
+
+    properties = propertiesData.map((p: any) => ({
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+      price: p.price,
+      city: p.city?.name ?? p.city ?? "",
+      neighborhood: p.neighborhood ?? "",
+      operation: p.operation,
+      propertyType: p.propertyType,
+      areaM2: p.areaM2,
+      bedrooms: p.bedrooms,
+      bathrooms: p.bathrooms,
+      imageUrl: getImageUrl(p.images?.[0]?.url || p.mainImageUrl || ""),
+      isFeatured: p.isFeatured ?? false,
+    }));
+  }
+} catch (error) {
+  console.error("Error al obtener propiedades", error);
+}
+
+// Calcular información de paginación
+const totalPages = Math.ceil(totalResults / limit);
+const hasNextPage = page < totalPages;
+const hasPrevPage = page > 1;
+
+// Determinar el título según la operación y filtros
+let pageTitle = heroTitle;
+if (isFeatured) {
+  pageTitle = "Propiedades destacadas";
+} else if (operation === "RENT" || operation === "rent") {
+  pageTitle = "Propiedades en alquiler en Sanlúcar de Barrameda";
+}
+
+// Filtrar solo imágenes activas y ordenarlas
+const activeHeroImages = heroImages
+  .filter((img: any) => img.active)
+  .sort((a: any, b: any) => a.order - b.order);
+---
+
+<MainLayout
+  title={pageTitle + " | Korvalia"}
+  description="Descubre todas nuestras propiedades disponibles en Sanlúcar de Barrameda. Encuentra tu hogar ideal."
+>
+  <!-- Hero -->
+  <PropertyHero title={pageTitle} heroImages={activeHeroImages} />
+
+  <!-- Introducción -->
+  <PropertyIntro />
+
+  <!-- Filtros y propiedades -->
+  <PropertyFilters client:load />
+
+  <!-- Grid de propiedades -->
+  <section id="properties-grid" class="properties-section">
+    <div class="container">
+      <!-- Indicador de propiedades destacadas -->
+      {
+        isFeatured && (
+          <div class="search-results-banner">
+            <div class="search-results-content">
+              <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                />
+              </svg>
+              <span class="search-results-text">
+                Propiedades destacadas: {totalResults} {totalResults === 1 ? "propiedad" : "propiedades"}
+              </span>
+              <a href="/propiedades" class="clear-search">
+                <svg class="close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        )
+      }
+
+      <!-- Indicador de resultados de búsqueda -->
+      {
+        searchQuery && (
+          <div class="search-results-banner">
+            <div class="search-results-content">
+              <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z"
+                />
+              </svg>
+              <span class="search-results-text">
+                {totalResults > 0
+                  ? `Resultados de búsqueda para "${searchQuery}": ${totalResults} ${totalResults === 1 ? "propiedad encontrada" : "propiedades encontradas"}`
+                  : `No se encontraron propiedades para "${searchQuery}"`}
+              </span>
+              <a href="/propiedades" class="clear-search">
+                <svg class="close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        )
+      }
+
+      <PropertyGrid properties={properties} client:load />
+
+      <!-- Paginación -->
+      {
+        totalPages > 1 && (
+          <div class="pagination-wrapper">
+            <div class="pagination">
+              {hasPrevPage && (
+                <a
+                  href={`/propiedades?${new URLSearchParams({
+                    ...(isFeatured && { featured: "true" }),
+                    ...(searchQuery && { q: searchQuery }),
+                    ...(operation && { operation }),
+                    ...(city && { city }),
+                    ...(priceRange && { price: priceRange }),
+                    page: (page - 1).toString(),
+                  }).toString()}#properties-grid`}
+                  class="pagination-btn"
+                >
+                  ← Anterior
+                </a>
+              )}
+
+              <span class="pagination-info">
+                Página {page} de {totalPages}
+              </span>
+
+              {hasNextPage && (
+                <a
+                  href={`/propiedades?${new URLSearchParams({
+                    ...(isFeatured && { featured: "true" }),
+                    ...(searchQuery && { q: searchQuery }),
+                    ...(operation && { operation }),
+                    ...(city && { city }),
+                    ...(priceRange && { price: priceRange }),
+                    page: (page + 1).toString(),
+                  }).toString()}#properties-grid`}
+                  class="pagination-btn"
+                >
+                  Siguiente →
+                </a>
+              )}
+            </div>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- Mapa de zonas -->
+  <ZoneMap />
+
+  <!-- CTA Final -->
+  <section class="cta-wrapper">
+    <FinalCTA />
+  </section>
+</MainLayout>
+
+<style>
+  .properties-section {
+    padding: 3rem 0 4rem;
+    /* background: #dbeaf5; */
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .search-results-banner {
+    background: linear-gradient(135deg, #133b34 0%, #39505d 100%);
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .search-results-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: white;
+  }
+
+  .search-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    flex-shrink: 0;
+  }
+
+  .search-results-text {
+    flex: 1;
+    font-size: 0.95rem;
+    font-weight: 500;
+  }
+
+  .clear-search {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .clear-search:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+  }
+
+  .close-icon {
+    width: 1rem;
+    height: 1rem;
+    color: white;
+  }
+
+  .pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 3rem;
+  }
+
+  .pagination {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .pagination-btn {
+    padding: 0.75rem 1.5rem;
+    background: #39505d;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .pagination-btn:hover {
+    background: #2d3f4a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(57, 80, 93, 0.3);
+  }
+
+  .pagination-info {
+    color: #39505d;
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  .cta-wrapper {
+    background: white;
+  }
+</style>

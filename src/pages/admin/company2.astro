@@ -1,0 +1,36 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../admin/layouts/AdminLayout.astro";
+import AdminSidebar from "../../admin/components/AdminSidebar.tsx";
+import AdminTopbar from "../../admin/components/AdminTopbar.tsx";
+import CompanyDataForm from "../../admin/components/CompanyDataForm.tsx";
+---
+
+<AdminLayout title="Datos de la Empresa - Panel Admin">
+  <AdminSidebar client:load currentPath="/admin/company" />
+
+  <div class="admin-main">
+    <AdminTopbar client:load />
+
+    <div class="admin-content">
+      <div class="admin-container">
+        <div style="margin-bottom: 2rem;">
+          <h1 style="font-size: 1.875rem; font-weight: 700; color: #111827; margin-bottom: 0.5rem;">
+            Datos de la Empresa
+          </h1>
+          <p style="color: #6b7280; font-size: 0.875rem;">
+            Gestiona la información de contacto, redes sociales, enlaces legales y logo de la empresa
+          </p>
+        </div>
+
+        <CompanyDataForm client:load />
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  const token = localStorage.getItem("admin_token");
+  if (!token) window.location.href = "/admin/login";
+</script>

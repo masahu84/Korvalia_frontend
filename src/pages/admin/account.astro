@@ -1,0 +1,27 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../admin/layouts/AdminLayout.astro";
+import AdminSidebar from "../../admin/components/AdminSidebar.tsx";
+import AdminTopbar from "../../admin/components/AdminTopbar.tsx";
+import AccountSettings from "../../admin/components/AccountSettings.tsx";
+---
+
+<AdminLayout title="Mi Cuenta - Panel Admin">
+  <AdminSidebar client:load currentPath="/admin/account" />
+
+  <div class="admin-main">
+    <AdminTopbar client:load />
+
+    <div class="admin-content">
+      <div class="admin-container">
+        <AccountSettings client:load />
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  const token = localStorage.getItem("admin_token");
+  if (!token) window.location.href = "/admin/login";
+</script>

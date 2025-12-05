@@ -1,0 +1,36 @@
+---
+export const prerender = false;
+
+import AdminLayout from "../../admin/layouts/AdminLayout.astro";
+import AdminSidebar from "../../admin/components/AdminSidebar.tsx";
+import AdminTopbar from "../../admin/components/AdminTopbar.tsx";
+---
+
+<AdminLayout title="Logo - Panel Admin">
+  <AdminSidebar client:load currentPath="/admin/logo" />
+
+  <div class="admin-main">
+    <AdminTopbar client:load />
+
+    <div class="admin-content">
+      <div class="admin-container">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h2 class="admin-card-title">Esta sección ha sido movida</h2>
+          </div>
+          <p style="color: #6b7280; margin-bottom: 1.5rem;">
+            La gestión del logo ahora está integrada en la sección "Datos de Empresa".
+          </p>
+          <a href="/admin/company" class="admin-btn admin-btn-primary">
+            Ir a Datos de Empresa
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  const token = localStorage.getItem("admin_token");
+  if (!token) window.location.href = "/admin/login";
+</script>

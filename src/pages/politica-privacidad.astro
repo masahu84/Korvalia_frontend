@@ -1,0 +1,181 @@
+---
+import MainLayout from "../components/layout/MainLayout.astro";
+
+const API_BASE = import.meta.env.PUBLIC_API_URL || "http://localhost:4000";
+
+let companyName = "Korvalia Inmobiliaria";
+let address = "";
+let email = "";
+
+try {
+  const response = await fetch(`${API_BASE}/api/settings`);
+  if (response.ok) {
+    const result = await response.json();
+    const data = result.data || {};
+    companyName = data.companyName || companyName;
+    address = data.address || "";
+    email = data.email || "";
+  }
+} catch (error) {
+  console.error("Error al cargar datos:", error);
+}
+---
+
+<MainLayout title="Política de Privacidad | Korvalia" description="Política de privacidad de Korvalia Inmobiliaria">
+  <div class="legal-page">
+    <div class="legal-container">
+      <h1 class="legal-title">Política de Privacidad</h1>
+
+      <section class="legal-section">
+        <h2>1. Responsable del Tratamiento</h2>
+        <p>
+          De conformidad con lo establecido en el Reglamento (UE) 2016/679 del Parlamento Europeo y del Consejo, de 27 de abril de 2016, relativo a la protección de las personas físicas (RGPD), y en la Ley Orgánica 3/2018, de 5 de diciembre, de Protección de Datos Personales y garantía de los derechos digitales (LOPDGDD), se informa a los usuarios de este sitio web de los siguientes aspectos:
+        </p>
+        <ul>
+          <li><strong>Responsable:</strong> {companyName}</li>
+          {address && <li><strong>Dirección:</strong> {address}</li>}
+          {email && <li><strong>Email de contacto:</strong> {email}</li>}
+        </ul>
+      </section>
+
+      <section class="legal-section">
+        <h2>2. Finalidad del Tratamiento</h2>
+        <p>Los datos personales que recabamos a través de este sitio web serán tratados con las siguientes finalidades:</p>
+        <ul>
+          <li>Gestionar las consultas y solicitudes de información recibidas.</li>
+          <li>Prestar los servicios inmobiliarios solicitados.</li>
+          <li>Enviar información comercial sobre nuestros servicios (con su consentimiento previo).</li>
+          <li>Cumplir con las obligaciones legales aplicables.</li>
+        </ul>
+      </section>
+
+      <section class="legal-section">
+        <h2>3. Legitimación</h2>
+        <p>La base legal para el tratamiento de sus datos personales es:</p>
+        <ul>
+          <li><strong>Consentimiento del interesado:</strong> Al facilitarnos sus datos a través de los formularios de contacto.</li>
+          <li><strong>Ejecución de un contrato:</strong> Para la prestación de servicios inmobiliarios.</li>
+          <li><strong>Interés legítimo:</strong> Para el mantenimiento de la relación comercial.</li>
+        </ul>
+      </section>
+
+      <section class="legal-section">
+        <h2>4. Conservación de Datos</h2>
+        <p>
+          Los datos personales se conservarán mientras sean necesarios para las finalidades para las que fueron recabados. Posteriormente, se conservarán bloqueados durante los plazos legalmente establecidos.
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>5. Destinatarios de los Datos</h2>
+        <p>
+          Los datos personales no serán cedidos a terceros, salvo obligación legal. En caso de ser necesario para la prestación del servicio, se comunicará previamente al interesado.
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>6. Derechos del Usuario</h2>
+        <p>Como usuario, tiene derecho a:</p>
+        <ul>
+          <li><strong>Acceso:</strong> Conocer qué datos personales tratamos sobre usted.</li>
+          <li><strong>Rectificación:</strong> Solicitar la corrección de datos inexactos.</li>
+          <li><strong>Supresión:</strong> Solicitar la eliminación de sus datos personales.</li>
+          <li><strong>Oposición:</strong> Oponerse al tratamiento de sus datos.</li>
+          <li><strong>Limitación:</strong> Solicitar la limitación del tratamiento.</li>
+          <li><strong>Portabilidad:</strong> Recibir sus datos en un formato estructurado.</li>
+          <li><strong>Revocación del consentimiento:</strong> Retirar el consentimiento en cualquier momento.</li>
+        </ul>
+        <p>
+          Para ejercer sus derechos, puede dirigirse a {email || companyName}, adjuntando copia de su DNI o documento identificativo equivalente.
+        </p>
+        <p>
+          Asimismo, tiene derecho a presentar una reclamación ante la Agencia Española de Protección de Datos (www.aepd.es).
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>7. Seguridad de los Datos</h2>
+        <p>
+          {companyName} ha adoptado las medidas técnicas y organizativas necesarias para garantizar la seguridad de los datos personales y evitar su alteración, pérdida, tratamiento o acceso no autorizado, habida cuenta del estado de la tecnología, la naturaleza de los datos almacenados y los riesgos a que están expuestos.
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>8. Datos de Menores</h2>
+        <p>
+          Este sitio web no está dirigido a menores de 14 años. En caso de que detectemos que un menor de edad ha proporcionado datos personales, procederemos a su eliminación inmediata.
+        </p>
+      </section>
+
+      <section class="legal-section">
+        <h2>9. Actualización de la Política</h2>
+        <p>
+          {companyName} se reserva el derecho a modificar la presente política para adaptarla a novedades legislativas o jurisprudenciales. En dichos supuestos, se anunciará en esta página los cambios introducidos con razonable antelación a su puesta en práctica.
+        </p>
+      </section>
+    </div>
+  </div>
+</MainLayout>
+
+<style>
+  .legal-page {
+    background: #ffffff;
+    min-height: calc(100vh - 200px);
+    padding: 4rem 0;
+  }
+
+  .legal-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .legal-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .legal-section {
+    margin-bottom: 2.5rem;
+  }
+
+  .legal-section h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #39505d;
+    margin-bottom: 1rem;
+  }
+
+  .legal-section p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #4b5563;
+    margin-bottom: 1rem;
+  }
+
+  .legal-section ul {
+    list-style: disc;
+    padding-left: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .legal-section li {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #4b5563;
+    margin-bottom: 0.5rem;
+  }
+
+  @media (max-width: 768px) {
+    .legal-title {
+      font-size: 2rem;
+    }
+
+    .legal-section h2 {
+      font-size: 1.25rem;
+    }
+  }
+</style>
