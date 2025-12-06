@@ -108,8 +108,10 @@ const hasMore = allProperties.length > 6;
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
       <!-- Título y subtítulo dentro de la franja celeste -->
       <div class="text-center pt-4 sm:pt-6 mb-6 lg:pt-8 lg:mb-8">
-        <h3 class="text-3xl sm:text-4xl font-bold mb-2" style="color: #39505d;">Propiedades destacadas</h3>
-        <p class="text-sm sm:text-base" style="color: #6a8074;">Propiedades seleccionadas para ti</p>
+        <h3 class="text-3xl sm:text-4xl font-bold mb-2" style="color: #39505d;">Propiedades seleccionadas para ti</h3>
+        <p class="text-sm sm:text-base" style="color: #6a8074;">
+          Una selección de inmuebles que cumplen nuestro estándar de calidad.
+        </p>
       </div>
 
       <!-- Buscador centrado (sobre fondo celeste) -->
@@ -146,9 +148,9 @@ const hasMore = allProperties.length > 6;
 
       <script>
         // Manejar búsqueda desde Home con redirección al grid
-        document.getElementById('home-search-form')?.addEventListener('submit', function(e) {
+        document.getElementById("home-search-form")?.addEventListener("submit", function (e) {
           e.preventDefault();
-          const input = document.getElementById('home-search') as HTMLInputElement;
+          const input = document.getElementById("home-search") as HTMLInputElement;
           const query = input?.value?.trim();
           if (query) {
             window.location.href = `/propiedades?q=${encodeURIComponent(query)}&page=1#properties-grid`;

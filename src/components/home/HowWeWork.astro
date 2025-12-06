@@ -8,10 +8,10 @@
       <!-- Columna izquierda: título + subtítulo + descripción + pasos -->
       <div class="process-column">
         <header class="process-header">
-          <h2 class="section-title">Cómo trabajamos</h2>
-          <p class="section-subtitle">Nuestro proceso</p>
+          <h2 class="section-title">Nuestro proceso</h2>
+          <!-- <p class="section-subtitle">Nuestro proceso</p> -->
           <p class="section-description">
-            Queremos que entiendas cada paso y sientas que todo está bajo control.<br />
+            Queremos que entiendas cada paso y sientas que todo está bajo control.<br /><br />
             <strong>Pasos:</strong>
           </p>
         </header>
@@ -20,38 +20,38 @@
           <div class="process-step">
             <div class="step-number">1</div>
             <div class="step-content">
-              <h3 class="step-title">Análisis y preparación de necesidades</h3>
-              <p class="step-description">
+              <h3 class="step-title">Primera conversación y análisis de necesidades.</h3>
+              <!-- <p class="step-description">
                 Analizamos tus necesidades y objetivos para ofrecerte las mejores opciones del mercado.
-              </p>
+              </p> -->
             </div>
           </div>
 
           <div class="process-step">
             <div class="step-number">2</div>
             <div class="step-content">
-              <h3 class="step-title">Visitamos y presentamos la organización del inmueble</h3>
-              <p class="step-description">
+              <h3 class="step-title">Valoración honesta y argumentada del inmueble.</h3>
+              <!-- <p class="step-description">
                 Te acompañamos en cada visita y te asesoramos sobre las características de cada propiedad.
-              </p>
+              </p> -->
             </div>
           </div>
 
           <div class="process-step">
             <div class="step-number">3</div>
             <div class="step-content">
-              <h3 class="step-title">Propuesta y gestión selectiva de la propiedad</h3>
-              <p class="step-description">Gestionamos toda la documentación y te ayudamos en la negociación.</p>
+              <h3 class="step-title">Preparación y presentación adecuada de la propiedad.</h3>
+              <!-- <p class="step-description">Gestionamos toda la documentación y te ayudamos en la negociación.</p> -->
             </div>
           </div>
 
           <div class="process-step">
             <div class="step-number">4</div>
             <div class="step-content">
-              <h3 class="step-title">Gestión, entrega y acompañamiento hasta el cierre</h3>
-              <p class="step-description">
+              <h3 class="step-title">Difusión, visitas y acompañamiento hasta el cierre.</h3>
+              <!-- <p class="step-description">
                 Te acompañamos hasta la firma y entrega de llaves, asegurando una experiencia sin complicaciones.
-              </p>
+              </p> -->
             </div>
           </div>
         </div>
@@ -197,7 +197,7 @@
 
   @media (max-width: 968px) {
     .how-we-work {
-      padding: 4rem 0 3rem; /* En móvil sí dejamos padding inferior */
+      padding: 4rem 0 0; /* Sin padding inferior para que la imagen llegue al borde */
     }
 
     .process-column {
@@ -205,14 +205,17 @@
     }
 
     .image-column {
-      justify-content: center;
+      justify-content: flex-end;
       align-items: center;
+      margin-top: 2rem;
     }
 
     .working-image {
       min-height: auto;
-      max-height: 350px;
-      width: auto;
+      max-height: 320px;
+      width: 100%;
+      margin-right: 0;
+      object-position: bottom center;
     }
   }
 </style>
