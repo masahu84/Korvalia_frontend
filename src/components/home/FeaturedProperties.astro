@@ -17,6 +17,20 @@ function getImageUrl(url: string): string {
 }
 
 let allProperties: Property[] = [];
+let homeSubtitle = "Una nueva forma de vivir y de vender en Sanlúcar"; // Valor por defecto
+
+// Cargar configuración de la home para obtener el subtítulo
+try {
+  const homeRes = await fetch(`${API_BASE}/api/pages/home`);
+  if (homeRes.ok) {
+    const homeJson = await homeRes.json();
+    if (homeJson.data?.subtitle) {
+      homeSubtitle = homeJson.data.subtitle;
+    }
+  }
+} catch (error) {
+  console.error("Error al obtener configuración de home", error);
+}
 
 try {
   // Solicitar todas las propiedades destacadas (limit=100)
@@ -54,8 +68,7 @@ const hasMore = allProperties.length > 6;
   <div class="container mx-auto px-4 sm:px-6 lg:px-8">
     <div class="text-center mb-16 lg:mb-20">
       <h2 class="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-8 leading-snug" style="color: #39505d;">
-        Una nueva forma de vivir y<br class="hidden sm:block" />
-        de vender en Sanlúcar
+        {homeSubtitle}
       </h2>
 
       <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
