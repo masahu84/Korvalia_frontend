@@ -23,25 +23,28 @@ try {
   const heroImagesRes = await fetch(`${API_BASE}/api/hero-images?pageKey=about`);
   if (heroImagesRes.ok) {
     const imagesData = await heroImagesRes.json();
-    heroImages = (imagesData.data || [])
-      .filter((img: any) => img.active)
-      .sort((a: any, b: any) => a.order - b.order);
+    heroImages = (imagesData.data || []).filter((img: any) => img.active).sort((a: any, b: any) => a.order - b.order);
   }
 } catch (error) {
   console.error("Error al cargar datos del hero:", error);
 }
 
 // Si no hay imágenes, usar imagen por defecto
-const slides = heroImages.length > 0 ? heroImages : [{
-  id: 0,
-  url: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1920&h=800&fit=crop&q=80",
-  order: 0
-}];
+const slides =
+  heroImages.length > 0
+    ? heroImages
+    : [
+        {
+          id: 0,
+          url: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1920&h=800&fit=crop&q=80",
+          order: 0,
+        },
+      ];
 ---
 
 <section class="about-hero">
   <div class="hero-background">
-    <HeroBackgroundSlider slides={slides} interval={1500} client:load />
+    <HeroBackgroundSlider slides={slides} interval={3500} client:load />
     <div class="hero-overlay"></div>
   </div>
 

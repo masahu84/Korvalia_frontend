@@ -217,6 +217,10 @@ body {
   grid-template-columns: repeat(3, 1fr);
 }
 
+.admin-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
 .admin-flex {
   display: flex;
 }
@@ -279,7 +283,14 @@ body {
   }
 
   .admin-grid-2,
-  .admin-grid-3 {
+  .admin-grid-3,
+  .admin-grid-4 {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 1024px) {
+  .admin-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

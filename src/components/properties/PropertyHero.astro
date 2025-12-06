@@ -8,23 +8,24 @@ export interface Props {
   heroImages?: Array<{ id: number; url: string; order: number }>;
 }
 
-const {
-  title = "Propiedades en venta en Sanlúcar de Barrameda",
-  subtitle = "",
-  heroImages = [],
-} = Astro.props;
+const { title = "Propiedades en venta en Sanlúcar de Barrameda", subtitle = "", heroImages = [] } = Astro.props;
 
 // Si no hay imágenes, usar imagen por defecto
-const slides = heroImages.length > 0 ? heroImages : [{
-  id: 0,
-  url: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1920&h=800&fit=crop&q=80",
-  order: 0
-}];
+const slides =
+  heroImages.length > 0
+    ? heroImages
+    : [
+        {
+          id: 0,
+          url: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1920&h=800&fit=crop&q=80",
+          order: 0,
+        },
+      ];
 ---
 
 <section class="property-hero">
   <div class="hero-background">
-    <HeroBackgroundSlider slides={slides} interval={1500} client:load />
+    <HeroBackgroundSlider slides={slides} interval={3500} client:load />
     <div class="hero-overlay"></div>
   </div>
 

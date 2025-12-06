@@ -33,17 +33,19 @@ try {
 
 // Si no hay imágenes, usar imagen por defecto
 if (heroImages.length === 0) {
-  heroImages = [{
-    id: 0,
-    url: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1920&h=1080&fit=crop",
-    order: 0
-  }];
+  heroImages = [
+    {
+      id: 0,
+      url: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1920&h=1080&fit=crop",
+      order: 0,
+    },
+  ];
 }
 ---
 
 <section class="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
   <!-- Fondo: slider dinámico con imágenes del admin -->
-  <HeroBackgroundSlider slides={heroImages} interval={1500} client:load />
+  <HeroBackgroundSlider slides={heroImages} interval={3500} client:load />
 
   <!-- Overlay oscuro para mejorar contraste del texto -->
   <div class="absolute inset-0 bg-black/50"></div>

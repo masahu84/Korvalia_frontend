@@ -10,6 +10,7 @@ interface Stats {
   rentProperties: number;
   saleProperties: number;
   featuredProperties: number;
+  totalCities: number;
   lastProperty?: {
     id: number;
     title: string;
@@ -24,6 +25,7 @@ export default function Dashboard() {
     rentProperties: 0,
     saleProperties: 0,
     featuredProperties: 0,
+    totalCities: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -35,18 +37,27 @@ export default function Dashboard() {
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/properties');
-      const properties = response.data || [];
 
-      const stats: Stats = {
+      // Cargar propiedades y ciudades en paralelo
+      const [propertiesRes, citiesRes] = await Promise.all([
+        api.get('/properties'),
+        api.get('/cities').catch(() => ({ data: [] })),
+      ]);
+
+      // La API devuelve { success, data: { properties: [...] } }
+      const properties = propertiesRes.data?.properties || propertiesRes.data || [];
+      const cities = Array.isArray(citiesRes.data) ? citiesRes.data : [];
+
+      const calculatedStats: Stats = {
         totalProperties: properties.length,
-        rentProperties: properties.filter((p: any) => p.operation === 'ALQUILER').length,
-        saleProperties: properties.filter((p: any) => p.operation === 'VENTA').length,
-        featuredProperties: properties.filter((p: any) => p.featured).length,
+        rentProperties: properties.filter((p: any) => p.operation === 'ALQUILER' || p.operation === 'RENT').length,
+        saleProperties: properties.filter((p: any) => p.operation === 'VENTA' || p.operation === 'SALE').length,
+        featuredProperties: properties.filter((p: any) => p.featured || p.isFeatured).length,
+        totalCities: cities.length,
         lastProperty: properties.length > 0 ? properties[0] : undefined,
       };
 
-      setStats(stats);
+      setStats(calculatedStats);
     } catch (err: any) {
       setError(err.message || 'Error al cargar las estadísticas');
     } finally {
@@ -80,7 +91,7 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div className="admin-grid admin-grid-3" style={{ marginBottom: '2rem' }}>
+      <div className="admin-grid admin-grid-4" style={{ marginBottom: '2rem' }}>
         <div className="admin-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
@@ -161,6 +172,33 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+
+        <div className="admin-card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <div>
+              <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '0.5rem' }}>
+                Ciudades
+              </p>
+              <p style={{ fontSize: '2rem', fontWeight: '700', color: '#111827' }}>
+                {stats.totalCities}
+              </p>
+            </div>
+            <div
+              style={{
+                width: '48px',
+                height: '48px',
+                borderRadius: '12px',
+                backgroundColor: '#e0e7ff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.5rem',
+              }}
+            >
+              📍
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="admin-grid admin-grid-2">
@@ -223,16 +261,19 @@ export default function Dashboard() {
         </div>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
           <a href="/admin/properties/new" className="admin-btn admin-btn-primary">
-            ➕ Nueva Propiedad
+            + Nueva Propiedad
           </a>
           <a href="/admin/properties" className="admin-btn admin-btn-secondary">
-            🏠 Ver todas las propiedades
+            Ver propiedades
           </a>
-          <a href="/admin/hero" className="admin-btn admin-btn-secondary">
-            🖼️ Configurar Hero
+          <a href="/admin/properties/cities" className="admin-btn admin-btn-secondary">
+            Gestionar ciudades
           </a>
-          <a href="/admin/logo" className="admin-btn admin-btn-secondary">
-            🎨 Actualizar Logo
+          <a href="/admin/settings/home" className="admin-btn admin-btn-secondary">
+            Configurar Home
+          </a>
+          <a href="/admin/company" className="admin-btn admin-btn-secondary">
+            Datos empresa
           </a>
         </div>
       </div>

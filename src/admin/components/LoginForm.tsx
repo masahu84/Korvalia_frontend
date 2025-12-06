@@ -2,14 +2,36 @@
  * Formulario de login del admin
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { login } from '../lib/auth';
+
+const API_BASE = typeof window !== 'undefined'
+  ? (import.meta.env?.PUBLIC_API_URL || 'http://localhost:4000')
+  : 'http://localhost:4000';
 
 export default function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [logoUrl, setLogoUrl] = useState('/logo.png');
+
+  useEffect(() => {
+    // Cargar logo desde settings
+    fetch(`${API_BASE}/api/settings`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.data?.logo) {
+          const logo = data.data.logo;
+          if (logo.startsWith('http')) {
+            setLogoUrl(logo);
+          } else {
+            setLogoUrl(`${API_BASE}${logo.startsWith('/') ? '' : '/'}${logo}`);
+          }
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +58,7 @@ export default function LoginForm() {
   return (
     <div className="auth-card">
       <div className="auth-header">
-        <h1 className="auth-logo">Korvalia</h1>
+        <img src={logoUrl} alt="Korvalia" className="auth-logo-img" />
         <p className="auth-subtitle">Panel de Administración</p>
       </div>
 

@@ -67,8 +67,9 @@
 
 <style>
   .how-we-work {
-    padding: 4rem 0 5rem;
+    padding: 4rem 0 0; /* Sin padding inferior para que la imagen llegue al borde */
     background: #dbeaf5;
+    overflow: hidden; /* Evita scroll si la imagen sobresale un poco */
   }
 
   .container {
@@ -81,7 +82,7 @@
     display: grid;
     grid-template-columns: 1.2fr 1fr;
     gap: 3.5rem;
-    align-items: stretch; /* 🔹 ambas columnas misma altura */
+    align-items: end; /* Alinea ambas columnas al fondo */
   }
 
   @media (max-width: 968px) {
@@ -122,6 +123,7 @@
   .process-column {
     display: flex;
     flex-direction: column;
+    padding-bottom: 3rem; /* Espacio inferior para la columna de texto */
   }
 
   .process-steps {
@@ -173,32 +175,44 @@
     margin: 0;
   }
 
-  /* 🔹 Columna de imagen: ocupa todo el alto del grid y pega la imagen abajo */
+  /* Columna de imagen: imagen pegada al borde inferior */
   .image-column {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end; /* imagen apoyada en el borde inferior */
-    align-items: center;
+    justify-content: flex-end;
+    align-items: flex-end; /* Alineada a la derecha */
+    overflow: visible;
   }
 
   .working-image {
-    max-height: 100%; /* crece hasta casi arriba */
-    max-width: 100%;
-    width: auto;
+    width: 130%; /* Más ancha, sobresale hacia la derecha */
+    max-width: none;
     height: auto;
+    min-height: 520px; /* Más alta */
+    object-fit: contain;
+    object-position: bottom right;
     display: block;
+    margin-right: -35%; /* Empuja hacia la derecha */
   }
 
   @media (max-width: 968px) {
+    .how-we-work {
+      padding: 4rem 0 3rem; /* En móvil sí dejamos padding inferior */
+    }
+
+    .process-column {
+      padding-bottom: 0;
+    }
+
     .image-column {
-      justify-content: flex-start; /* en móvil, comportamiento normal */
-      align-items: flex-start;
+      justify-content: center;
+      align-items: center;
     }
 
     .working-image {
-      max-height: none;
-      width: 100%;
-      height: auto;
+      min-height: auto;
+      max-height: 350px;
+      width: auto;
     }
   }
 </style>

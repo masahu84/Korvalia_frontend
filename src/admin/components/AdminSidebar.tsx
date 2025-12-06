@@ -44,11 +44,18 @@ export default function AdminSidebar({ currentPath = '' }: SidebarProps) {
     }
   }, []);
 
-  const isActive = (path: string) => {
-    if (path === '/admin/dashboard') {
+  const isActive = (path: string, exact: boolean = false) => {
+    if (exact || path === '/admin/dashboard') {
       return activePath === path;
     }
-    return activePath.startsWith(path);
+    // Para rutas con subitems, solo marcar como activo si coincide exactamente
+    // o si es la ruta padre y estamos en una subruta
+    return activePath === path || activePath.startsWith(path + '/');
+  };
+
+  // Para subitems, siempre usar coincidencia exacta
+  const isSubItemActive = (path: string) => {
+    return activePath === path;
   };
 
   const toggleExpanded = (path: string) => {
@@ -126,19 +133,19 @@ export default function AdminSidebar({ currentPath = '' }: SidebarProps) {
                                 padding: '0.5rem 1rem',
                                 borderRadius: '8px',
                                 textDecoration: 'none',
-                                color: isActive(subItem.path) ? 'white' : '#9ca3af',
-                                backgroundColor: isActive(subItem.path) ? '#2563eb' : 'transparent',
+                                color: isSubItemActive(subItem.path) ? 'white' : '#9ca3af',
+                                backgroundColor: isSubItemActive(subItem.path) ? '#2563eb' : 'transparent',
                                 transition: 'all 0.2s',
                                 fontSize: '0.8125rem',
                                 fontWeight: '400',
                               }}
                               onMouseEnter={(e) => {
-                                if (!isActive(subItem.path)) {
+                                if (!isSubItemActive(subItem.path)) {
                                   e.currentTarget.style.backgroundColor = '#374151';
                                 }
                               }}
                               onMouseLeave={(e) => {
-                                if (!isActive(subItem.path)) {
+                                if (!isSubItemActive(subItem.path)) {
                                   e.currentTarget.style.backgroundColor = 'transparent';
                                 }
                               }}
