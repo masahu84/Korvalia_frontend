@@ -123,7 +123,7 @@ function PropertyFormInner({ propertyId }: PropertyFormProps) {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  const { showToast, showLoading, hideLoading, updateToast } = useToast();
+  const toast = useToast();
 
   useEffect(() => {
     fetchCities();
@@ -137,7 +137,7 @@ function PropertyFormInner({ propertyId }: PropertyFormProps) {
       const response = await api.get('/cities', { requiresAuth: false });
       setCities(response.data || []);
     } catch (err: any) {
-      showToast('error', 'Error al cargar las ciudades');
+      toast.error('Error al cargar las ciudades');
     }
   };
 
@@ -194,7 +194,7 @@ function PropertyFormInner({ propertyId }: PropertyFormProps) {
       console.log('[PropertyForm] Formulario cargado correctamente');
     } catch (err: any) {
       console.error('[PropertyForm] Error al cargar propiedad:', err);
-      showToast('error', err.message || 'Error al cargar la propiedad');
+      toast.error(err.message || 'Error al cargar la propiedad');
     } finally {
       setLoading(false);
     }
@@ -220,7 +220,7 @@ function PropertyFormInner({ propertyId }: PropertyFormProps) {
     if (!files || files.length === 0) return;
 
     setUploadingImages(true);
-    const loadingId = showLoading('Subiendo imágenes...');
+    toast.loading('Subiendo imágenes...');
 
     try {
       const validFiles: File[] = [];
@@ -231,7 +231,7 @@ function PropertyFormInner({ propertyId }: PropertyFormProps) {
         const validation = validateImageFile(file);
 
         if (!validation.valid) {
-          showToast('warning', validation.error || 'Archivo no válido');
+          toast.warning(validation.error || 'Archivo no válido');
           continue;
         }
 
@@ -241,7 +241,7 @@ function PropertyFormInner({ propertyId }: PropertyFormProps) {
       }
 
       if (validFiles.length === 0) {
-        hideLoading(loadingId);
+        toast.dismiss();
         setUploadingImages(false);
         return;
       }
@@ -254,9 +254,9 @@ function PropertyFormInner({ propertyId }: PropertyFormProps) {
       }));
 
       setImagePreviews((prev) => [...prev, ...previews]);
-      updateToast(loadingId, 'success', `${urls.length} imagen(es) subida(s) correctamente`);
+      toast.success(`${urls.length} imagen(es) subida(s) correctamente`);
     } catch (err: any) {
-      updateToast(loadingId, 'error', err.message || 'Error al subir las imágenes');
+      toast.error(err.message || 'Error al subir las imágenes');
     } finally {
       setUploadingImages(false);
     }
@@ -281,7 +281,7 @@ function PropertyFormInner({ propertyId }: PropertyFormProps) {
 
   const handleSetPrimaryImage = (index: number) => {
     setPrimaryImageIndex(index);
-    showToast('info', 'Imagen principal actualizada');
+    toast.info('Imagen principal actualizada');
   };
 
   const validateForm = (): boolean => {
@@ -320,12 +320,12 @@ function PropertyFormInner({ propertyId }: PropertyFormProps) {
     setValidationErrors({});
 
     if (!validateForm()) {
-      showToast('warning', 'Por favor, completa todos los campos requeridos');
+      toast.warning('Por favor, completa todos los campos requeridos');
       return;
     }
 
     setSaving(true);
-    const loadingId = showLoading(propertyId ? 'Actualizando propiedad...' : 'Creando propiedad...');
+    toast.loading(propertyId ? 'Actualizando propiedad...' : 'Creando propiedad...');
 
     try {
       const payload = {
@@ -361,10 +361,10 @@ function PropertyFormInner({ propertyId }: PropertyFormProps) {
 
       if (propertyId) {
         await api.put(`/properties/${propertyId}`, payload);
-        updateToast(loadingId, 'success', 'Propiedad actualizada correctamente');
+        toast.success('Propiedad actualizada correctamente');
       } else {
         await api.post('/properties', payload);
-        updateToast(loadingId, 'success', 'Propiedad creada correctamente');
+        toast.success('Propiedad creada correctamente');
       }
 
       setTimeout(() => {
@@ -375,9 +375,9 @@ function PropertyFormInner({ propertyId }: PropertyFormProps) {
         const backendErrors = err.response.data.details;
         const { stack, ...validationErrs } = backendErrors;
         setValidationErrors(validationErrs);
-        updateToast(loadingId, 'error', err.response.data.error || 'Error de validación');
+        toast.error(err.response.data.error || 'Error de validación');
       } else {
-        updateToast(loadingId, 'error', err.message || 'Error al guardar la propiedad');
+        toast.error(err.message || 'Error al guardar la propiedad');
       }
     } finally {
       setSaving(false);
@@ -1020,7 +1020,7 @@ function PropertyFormInner({ propertyId }: PropertyFormProps) {
   );
 }
 
-// Componente exportado que incluye el ToastProvider
+// Componente exportado con ToastProvider
 export default function PropertyForm({ propertyId }: PropertyFormProps) {
   return (
     <ToastProvider>

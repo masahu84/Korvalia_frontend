@@ -6,6 +6,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { api } from '../lib/api';
 import { uploadImage, validateImageFile } from '../lib/upload';
+import { useToast, ToastProvider } from './Toast';
 
 const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:4000';
 
@@ -17,15 +18,14 @@ function getImageUrl(url: string): string {
   return url.startsWith('/') ? `${API_BASE}${url}` : `${API_BASE}/${url}`;
 }
 
-export default function ContactSettingsForm() {
+function ContactSettingsFormInner() {
   const [heroImage, setHeroImage] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const toast = useToast();
 
   useEffect(() => {
     fetchPageSettings();
@@ -40,7 +40,7 @@ export default function ContactSettingsForm() {
 
       setHeroImage(blocks.heroImage || '');
     } catch (err: any) {
-      setError(err.message || 'Error al cargar la configuración');
+      toast.error(err.message || 'Error al cargar la configuración');
     } finally {
       setLoading(false);
     }
@@ -52,17 +52,18 @@ export default function ContactSettingsForm() {
 
     const validation = validateImageFile(file);
     if (!validation.valid) {
-      setError(validation.error || 'Error en validación');
+      toast.error(validation.error || 'Error en validación');
       return;
     }
 
     try {
       setUploading(true);
-      setError('');
+      toast.loading('Subiendo imagen...');
       const url = await uploadImage(file);
       setHeroImage(url);
+      toast.success('Imagen subida correctamente');
     } catch (err: any) {
-      setError(err.message || 'Error al subir la imagen');
+      toast.error(err.message || 'Error al subir la imagen');
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -75,9 +76,8 @@ export default function ContactSettingsForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
     setSaving(true);
+    toast.loading('Guardando configuración...');
 
     try {
       const dataToSend = {
@@ -91,10 +91,9 @@ export default function ContactSettingsForm() {
       };
 
       await api.put('/pages/contact', dataToSend);
-      setSuccess('Configuración guardada exitosamente');
-      setTimeout(() => setSuccess(''), 3000);
+      toast.success('Configuración guardada exitosamente');
     } catch (err: any) {
-      setError(err.message || 'Error al guardar la configuración');
+      toast.error(err.message || 'Error al guardar la configuración');
     } finally {
       setSaving(false);
     }
@@ -110,36 +109,6 @@ export default function ContactSettingsForm() {
 
   return (
     <div>
-      {error && (
-        <div
-          style={{
-            backgroundColor: '#fee2e2',
-            color: '#991b1b',
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            marginBottom: '1.5rem',
-            borderLeft: '4px solid #dc2626',
-          }}
-        >
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div
-          style={{
-            backgroundColor: '#d1fae5',
-            color: '#065f46',
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            marginBottom: '1.5rem',
-            borderLeft: '4px solid #10b981',
-          }}
-        >
-          {success}
-        </div>
-      )}
-
       <form onSubmit={handleSubmit}>
         <div className="admin-card" style={{ marginBottom: '2rem' }}>
           <div className="admin-card-header">
@@ -244,5 +213,14 @@ export default function ContactSettingsForm() {
         </div>
       </form>
     </div>
+  );
+}
+
+// Componente exportado con ToastProvider
+export default function ContactSettingsForm() {
+  return (
+    <ToastProvider>
+      <ContactSettingsFormInner />
+    </ToastProvider>
   );
 }

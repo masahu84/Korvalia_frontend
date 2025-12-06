@@ -5,7 +5,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { api } from '../lib/api';
-import { uploadImage, validateImageFile, fileToBase64 } from '../lib/upload';
+import { uploadImage, validateImageFile } from '../lib/upload';
+import { useToast, ToastProvider } from './Toast';
 
 interface VisionData {
   title: string;
@@ -34,7 +35,7 @@ function getImageUrl(url: string): string {
   return url.startsWith('/') ? `${API_BASE}${url}` : `${API_BASE}/${url}`;
 }
 
-export default function AboutSettingsForm() {
+function AboutSettingsFormInner() {
   const [formData, setFormData] = useState<FormData>({
     title: '',
     vision: {
@@ -50,13 +51,13 @@ export default function AboutSettingsForm() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [uploadingMain, setUploadingMain] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
 
   const mainImageRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
+
+  const toast = useToast();
 
   useEffect(() => {
     fetchPageSettings();
@@ -82,7 +83,7 @@ export default function AboutSettingsForm() {
         },
       });
     } catch (err: any) {
-      setError(err.message || 'Error al cargar la configuración');
+      toast.error(err.message || 'Error al cargar la configuración');
     } finally {
       setLoading(false);
     }
@@ -111,20 +112,21 @@ export default function AboutSettingsForm() {
 
     const validation = validateImageFile(file);
     if (!validation.valid) {
-      setError(validation.error || 'Error en validación');
+      toast.error(validation.error || 'Error en validación');
       return;
     }
 
     try {
       setUploadingMain(true);
-      setError('');
+      toast.loading('Subiendo imagen...');
       const url = await uploadImage(file);
       setFormData({
         ...formData,
         showcase: { ...formData.showcase, mainImage: url },
       });
+      toast.success('Imagen subida correctamente');
     } catch (err: any) {
-      setError(err.message || 'Error al subir la imagen');
+      toast.error(err.message || 'Error al subir la imagen');
     } finally {
       setUploadingMain(false);
       if (mainImageRef.current) mainImageRef.current.value = '';
@@ -140,7 +142,7 @@ export default function AboutSettingsForm() {
     const remainingSlots = 6 - currentCount;
 
     if (remainingSlots <= 0) {
-      setError('Ya tienes 6 imágenes en la galería. Elimina alguna para añadir más.');
+      toast.error('Ya tienes 6 imágenes en la galería. Elimina alguna para añadir más.');
       return;
     }
 
@@ -148,13 +150,13 @@ export default function AboutSettingsForm() {
 
     try {
       setUploadingGallery(true);
-      setError('');
+      toast.loading('Subiendo imágenes...');
 
       const newUrls: string[] = [];
       for (const file of filesToUpload) {
         const validation = validateImageFile(file);
         if (!validation.valid) {
-          setError(validation.error || 'Error en validación');
+          toast.warning(validation.error || 'Error en validación');
           continue;
         }
         const url = await uploadImage(file);
@@ -168,8 +170,9 @@ export default function AboutSettingsForm() {
           galleryImages: [...formData.showcase.galleryImages, ...newUrls],
         },
       });
+      toast.success(`${newUrls.length} imagen(es) subida(s) correctamente`);
     } catch (err: any) {
-      setError(err.message || 'Error al subir las imágenes');
+      toast.error(err.message || 'Error al subir las imágenes');
     } finally {
       setUploadingGallery(false);
       if (galleryInputRef.current) galleryInputRef.current.value = '';
@@ -193,9 +196,8 @@ export default function AboutSettingsForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
     setSaving(true);
+    toast.loading('Guardando configuración...');
 
     try {
       const dataToSend = {
@@ -210,10 +212,9 @@ export default function AboutSettingsForm() {
       };
 
       await api.put('/pages/about', dataToSend);
-      setSuccess('Configuración guardada exitosamente');
-      setTimeout(() => setSuccess(''), 3000);
+      toast.success('Configuración guardada exitosamente');
     } catch (err: any) {
-      setError(err.message || 'Error al guardar la configuración');
+      toast.error(err.message || 'Error al guardar la configuración');
     } finally {
       setSaving(false);
     }
@@ -229,36 +230,6 @@ export default function AboutSettingsForm() {
 
   return (
     <div>
-      {error && (
-        <div
-          style={{
-            backgroundColor: '#fee2e2',
-            color: '#991b1b',
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            marginBottom: '1.5rem',
-            borderLeft: '4px solid #dc2626',
-          }}
-        >
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div
-          style={{
-            backgroundColor: '#d1fae5',
-            color: '#065f46',
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            marginBottom: '1.5rem',
-            borderLeft: '4px solid #10b981',
-          }}
-        >
-          {success}
-        </div>
-      )}
-
       <form onSubmit={handleSubmit}>
         {/* Título del Hero */}
         <div className="admin-card" style={{ marginBottom: '2rem' }}>
@@ -537,5 +508,14 @@ export default function AboutSettingsForm() {
         </div>
       </form>
     </div>
+  );
+}
+
+// Componente exportado con ToastProvider
+export default function AboutSettingsForm() {
+  return (
+    <ToastProvider>
+      <AboutSettingsFormInner />
+    </ToastProvider>
   );
 }

@@ -5,16 +5,17 @@
 
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
+import { useToast, ToastProvider } from './Toast';
 
-export default function PropertiesSettingsForm() {
+function PropertiesSettingsFormInner() {
   const [formData, setFormData] = useState({
     title: '',
   });
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+
+  const toast = useToast();
 
   useEffect(() => {
     fetchPageSettings();
@@ -30,7 +31,7 @@ export default function PropertiesSettingsForm() {
         title: data.title || 'Propiedades en venta en Sanlúcar de Barrameda',
       });
     } catch (err: any) {
-      setError(err.message || 'Error al cargar la configuración');
+      toast.error(err.message || 'Error al cargar la configuración');
     } finally {
       setLoading(false);
     }
@@ -45,9 +46,8 @@ export default function PropertiesSettingsForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
     setSaving(true);
+    toast.loading('Guardando configuración...');
 
     try {
       const dataToSend = {
@@ -59,10 +59,9 @@ export default function PropertiesSettingsForm() {
       };
 
       await api.put('/pages/properties', dataToSend);
-      setSuccess('Configuración guardada exitosamente');
-      setTimeout(() => setSuccess(''), 3000);
+      toast.success('Configuración guardada exitosamente');
     } catch (err: any) {
-      setError(err.message || 'Error al guardar la configuración');
+      toast.error(err.message || 'Error al guardar la configuración');
     } finally {
       setSaving(false);
     }
@@ -86,36 +85,6 @@ export default function PropertiesSettingsForm() {
           Gestiona el título del Hero y las imágenes de fondo
         </p>
       </div>
-
-      {error && (
-        <div
-          style={{
-            backgroundColor: '#fee2e2',
-            color: '#991b1b',
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            marginBottom: '1.5rem',
-            borderLeft: '4px solid #dc2626',
-          }}
-        >
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div
-          style={{
-            backgroundColor: '#d1fae5',
-            color: '#065f46',
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            marginBottom: '1.5rem',
-            borderLeft: '4px solid #10b981',
-          }}
-        >
-          {success}
-        </div>
-      )}
 
       <form onSubmit={handleSubmit}>
         <div className="admin-card" style={{ marginBottom: '2rem' }}>
@@ -162,5 +131,14 @@ export default function PropertiesSettingsForm() {
         </div>
       </form>
     </div>
+  );
+}
+
+// Componente exportado con ToastProvider
+export default function PropertiesSettingsForm() {
+  return (
+    <ToastProvider>
+      <PropertiesSettingsFormInner />
+    </ToastProvider>
   );
 }

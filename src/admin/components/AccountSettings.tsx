@@ -5,15 +5,16 @@
 import { useState, useEffect } from 'react';
 import { changePassword } from '../lib/auth';
 import { api } from '../lib/api';
+import { useToast, ToastProvider } from './Toast';
 
-export default function AccountSettings() {
+function AccountSettingsInner() {
   const [userEmail, setUserEmail] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+
+  const toast = useToast();
 
   useEffect(() => {
     fetchUserData();
@@ -30,20 +31,19 @@ export default function AccountSettings() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
 
     if (newPassword !== confirmPassword) {
-      setError('Las contraseñas nuevas no coinciden');
+      toast.error('Las contraseñas nuevas no coinciden');
       return;
     }
 
     if (newPassword.length < 6) {
-      setError('La nueva contraseña debe tener al menos 6 caracteres');
+      toast.error('La nueva contraseña debe tener al menos 6 caracteres');
       return;
     }
 
     setLoading(true);
+    toast.loading('Actualizando contraseña...');
 
     try {
       await changePassword({
@@ -51,12 +51,12 @@ export default function AccountSettings() {
         newPassword,
       });
 
-      setSuccess('Contraseña actualizada correctamente');
+      toast.success('Contraseña actualizada correctamente');
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (err: any) {
-      setError(err.message || 'Error al cambiar la contraseña');
+      toast.error(err.message || 'Error al cambiar la contraseña');
     } finally {
       setLoading(false);
     }
@@ -91,36 +91,6 @@ export default function AccountSettings() {
             Actualiza tu contraseña de acceso al panel de administración
           </p>
         </div>
-
-        {error && (
-          <div
-            style={{
-              backgroundColor: '#fee2e2',
-              color: '#991b1b',
-              padding: '0.75rem 1rem',
-              borderRadius: '8px',
-              marginBottom: '1.5rem',
-              borderLeft: '4px solid #dc2626',
-            }}
-          >
-            {error}
-          </div>
-        )}
-
-        {success && (
-          <div
-            style={{
-              backgroundColor: '#d1fae5',
-              color: '#065f46',
-              padding: '0.75rem 1rem',
-              borderRadius: '8px',
-              marginBottom: '1.5rem',
-              borderLeft: '4px solid #10b981',
-            }}
-          >
-            {success}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit}>
           <div className="admin-form-group">
@@ -173,5 +143,14 @@ export default function AccountSettings() {
         </form>
       </div>
     </div>
+  );
+}
+
+// Componente exportado con ToastProvider
+export default function AccountSettings() {
+  return (
+    <ToastProvider>
+      <AccountSettingsInner />
+    </ToastProvider>
   );
 }

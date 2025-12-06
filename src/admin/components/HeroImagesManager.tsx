@@ -5,6 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
+import { useToast, ToastProvider } from './Toast';
 
 interface HeroImage {
   id: number;
@@ -18,14 +19,14 @@ interface HeroImagesManagerProps {
   pageKey?: 'home' | 'properties' | 'about' | 'contact';
 }
 
-export default function HeroImagesManager({ pageKey = 'home' }: HeroImagesManagerProps) {
+function HeroImagesManagerInner({ pageKey = 'home' }: HeroImagesManagerProps) {
   const [images, setImages] = useState<HeroImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingImages, setUploadingImages] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+
+  const toast = useToast();
 
   useEffect(() => {
     fetchImages();
@@ -34,12 +35,11 @@ export default function HeroImagesManager({ pageKey = 'home' }: HeroImagesManage
   const fetchImages = async () => {
     try {
       setLoading(true);
-      setError('');
       const response = await api.get(`/hero-images?pageKey=${pageKey}`);
       setImages(response.data || []);
     } catch (err: any) {
       console.error('Error al cargar imágenes del hero:', err);
-      setError('Error al cargar las imágenes');
+      toast.error('Error al cargar las imágenes');
     } finally {
       setLoading(false);
     }
@@ -49,7 +49,6 @@ export default function HeroImagesManager({ pageKey = 'home' }: HeroImagesManage
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    setError('');
     setUploadingImages(true);
 
     try {
@@ -61,14 +60,14 @@ export default function HeroImagesManager({ pageKey = 'home' }: HeroImagesManage
 
         // Validar tipo
         if (!file.type.startsWith('image/')) {
-          setError(`El archivo ${file.name} no es una imagen válida`);
+          toast.error(`El archivo ${file.name} no es una imagen válida`);
           continue;
         }
 
         // Validar tamaño (10MB)
         const maxSize = 10 * 1024 * 1024;
         if (file.size > maxSize) {
-          setError(`El archivo ${file.name} excede el tamaño máximo de 10MB`);
+          toast.error(`El archivo ${file.name} excede el tamaño máximo de 10MB`);
           continue;
         }
 
@@ -76,7 +75,7 @@ export default function HeroImagesManager({ pageKey = 'home' }: HeroImagesManage
         const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
         const extension = file.name.split('.').pop()?.toLowerCase();
         if (!extension || !allowedExtensions.includes(extension)) {
-          setError(`El archivo ${file.name} no tiene una extensión permitida (jpg, jpeg, png, webp)`);
+          toast.error(`El archivo ${file.name} no tiene una extensión permitida`);
           continue;
         }
 
@@ -87,6 +86,8 @@ export default function HeroImagesManager({ pageKey = 'home' }: HeroImagesManage
         setUploadingImages(false);
         return;
       }
+
+      toast.loading('Subiendo imágenes...');
 
       // Subir cada archivo al endpoint /api/hero-images/upload
       const uploadPromises = validFiles.map(async (file) => {
@@ -99,8 +100,8 @@ export default function HeroImagesManager({ pageKey = 'home' }: HeroImagesManage
 
       await Promise.all(uploadPromises);
 
-      setSuccess(`${validFiles.length} imagen(es) subida(s) correctamente`);
-      setTimeout(() => setSuccess(''), 3000);
+      toast.dismiss('loading');
+      toast.success(`${validFiles.length} imagen(es) subida(s) correctamente`);
 
       // Recargar imágenes
       await fetchImages();
@@ -109,7 +110,8 @@ export default function HeroImagesManager({ pageKey = 'home' }: HeroImagesManage
       e.target.value = '';
     } catch (err: any) {
       console.error('Error al subir imágenes:', err);
-      setError(err.response?.data?.error || err.message || 'Error al subir las imágenes');
+      toast.dismiss('loading');
+      toast.error(err.response?.data?.error || err.message || 'Error al subir las imágenes');
     } finally {
       setUploadingImages(false);
     }
@@ -119,10 +121,9 @@ export default function HeroImagesManager({ pageKey = 'home' }: HeroImagesManage
     try {
       await api.put(`/hero-images/${id}`, { active: !currentActive });
       setImages(images.map((img) => (img.id === id ? { ...img, active: !currentActive } : img)));
-      setSuccess('Estado actualizado');
-      setTimeout(() => setSuccess(''), 2000);
+      toast.success('Estado actualizado');
     } catch (err: any) {
-      setError(err.response?.data?.error || err.message || 'Error al actualizar el estado');
+      toast.error(err.response?.data?.error || err.message || 'Error al actualizar el estado');
     }
   };
 
@@ -131,13 +132,16 @@ export default function HeroImagesManager({ pageKey = 'home' }: HeroImagesManage
       return;
     }
 
+    toast.loading('Eliminando imagen...');
+
     try {
       await api.delete(`/hero-images/${id}`);
       setImages(images.filter((img) => img.id !== id));
-      setSuccess('Imagen eliminada');
-      setTimeout(() => setSuccess(''), 2000);
+      toast.dismiss('loading');
+      toast.success('Imagen eliminada');
     } catch (err: any) {
-      setError(err.response?.data?.error || err.message || 'Error al eliminar la imagen');
+      toast.dismiss('loading');
+      toast.error(err.response?.data?.error || err.message || 'Error al eliminar la imagen');
     }
   };
 
@@ -164,7 +168,7 @@ export default function HeroImagesManager({ pageKey = 'home' }: HeroImagesManage
 
   const handleSaveOrder = async () => {
     setSaving(true);
-    setError('');
+    toast.loading('Guardando orden...');
 
     try {
       // Actualizar el orden de todas las imágenes
@@ -174,10 +178,11 @@ export default function HeroImagesManager({ pageKey = 'home' }: HeroImagesManage
       }));
 
       await api.put('/hero-images/bulk', { updates });
-      setSuccess('Orden guardado correctamente');
-      setTimeout(() => setSuccess(''), 2000);
+      toast.dismiss('loading');
+      toast.success('Orden guardado correctamente');
     } catch (err: any) {
-      setError(err.response?.data?.error || err.message || 'Error al guardar el orden');
+      toast.dismiss('loading');
+      toast.error(err.response?.data?.error || err.message || 'Error al guardar el orden');
     } finally {
       setSaving(false);
     }
@@ -212,36 +217,6 @@ export default function HeroImagesManager({ pageKey = 'home' }: HeroImagesManage
           </div>
         </div>
       </div>
-
-      {error && (
-        <div
-          style={{
-            backgroundColor: '#fee2e2',
-            color: '#991b1b',
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            marginBottom: '1.5rem',
-            borderLeft: '4px solid #dc2626',
-          }}
-        >
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div
-          style={{
-            backgroundColor: '#d1fae5',
-            color: '#065f46',
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            marginBottom: '1.5rem',
-            borderLeft: '4px solid #10b981',
-          }}
-        >
-          {success}
-        </div>
-      )}
 
       {/* Subir nuevas imágenes */}
       <div style={{ marginBottom: '2rem' }}>
@@ -402,5 +377,14 @@ export default function HeroImagesManager({ pageKey = 'home' }: HeroImagesManage
         </>
       )}
     </div>
+  );
+}
+
+// Componente exportado con ToastProvider
+export default function HeroImagesManager({ pageKey = 'home' }: HeroImagesManagerProps) {
+  return (
+    <ToastProvider>
+      <HeroImagesManagerInner pageKey={pageKey} />
+    </ToastProvider>
   );
 }

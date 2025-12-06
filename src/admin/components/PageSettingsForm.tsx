@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
+import { useToast, ToastProvider } from './Toast';
 
 interface PageSettingsFormProps {
   pageKey: 'home' | 'properties' | 'about' | 'contact';
@@ -21,7 +22,7 @@ interface PageSettings {
   blocks: any;
 }
 
-export default function PageSettingsForm({ pageKey, pageTitle, pageDescription }: PageSettingsFormProps) {
+function PageSettingsFormInner({ pageKey, pageTitle, pageDescription }: PageSettingsFormProps) {
   const [formData, setFormData] = useState({
     title: '',
     subtitle: '',
@@ -32,8 +33,8 @@ export default function PageSettingsForm({ pageKey, pageTitle, pageDescription }
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+
+  const toast = useToast();
 
   useEffect(() => {
     fetchPageSettings();
@@ -53,7 +54,7 @@ export default function PageSettingsForm({ pageKey, pageTitle, pageDescription }
         blocks: JSON.stringify(data.blocks || {}, null, 2),
       });
     } catch (err: any) {
-      setError(err.message || 'Error al cargar la configuración');
+      toast.error(err.message || 'Error al cargar la configuración');
     } finally {
       setLoading(false);
     }
@@ -68,8 +69,6 @@ export default function PageSettingsForm({ pageKey, pageTitle, pageDescription }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
     setSaving(true);
 
     try {
@@ -78,10 +77,12 @@ export default function PageSettingsForm({ pageKey, pageTitle, pageDescription }
       try {
         blocksData = JSON.parse(formData.blocks);
       } catch {
-        setError('El formato del JSON en "Configuración Avanzada" no es válido');
+        toast.error('El formato del JSON en "Configuración Avanzada" no es válido');
         setSaving(false);
         return;
       }
+
+      toast.loading('Guardando configuración...');
 
       const dataToSend = {
         title: formData.title,
@@ -92,10 +93,9 @@ export default function PageSettingsForm({ pageKey, pageTitle, pageDescription }
       };
 
       await api.put(`/pages/${pageKey}`, dataToSend);
-      setSuccess('Configuración guardada exitosamente');
-      setTimeout(() => setSuccess(''), 3000);
+      toast.success('Configuración guardada exitosamente');
     } catch (err: any) {
-      setError(err.message || 'Error al guardar la configuración');
+      toast.error(err.message || 'Error al guardar la configuración');
     } finally {
       setSaving(false);
     }
@@ -121,36 +121,6 @@ export default function PageSettingsForm({ pageKey, pageTitle, pageDescription }
           </p>
         )}
       </div>
-
-      {error && (
-        <div
-          style={{
-            backgroundColor: '#fee2e2',
-            color: '#991b1b',
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            marginBottom: '1.5rem',
-            borderLeft: '4px solid #dc2626',
-          }}
-        >
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div
-          style={{
-            backgroundColor: '#d1fae5',
-            color: '#065f46',
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            marginBottom: '1.5rem',
-            borderLeft: '4px solid #10b981',
-          }}
-        >
-          {success}
-        </div>
-      )}
 
       <form onSubmit={handleSubmit}>
         <div className="admin-card" style={{ marginBottom: '2rem' }}>
@@ -264,5 +234,14 @@ export default function PageSettingsForm({ pageKey, pageTitle, pageDescription }
         </div>
       </form>
     </div>
+  );
+}
+
+// Componente exportado con ToastProvider
+export default function PageSettingsForm({ pageKey, pageTitle, pageDescription }: PageSettingsFormProps) {
+  return (
+    <ToastProvider>
+      <PageSettingsFormInner pageKey={pageKey} pageTitle={pageTitle} pageDescription={pageDescription} />
+    </ToastProvider>
   );
 }

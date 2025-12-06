@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
 import { uploadImage, validateImageFile, fileToBase64 } from '../lib/upload';
+import { useToast, ToastProvider } from './Toast';
 
 interface HomeSettings {
   id: number;
@@ -18,7 +19,7 @@ interface HomeSettings {
   testimonialImage: string;
 }
 
-export default function HomeSettingsForm() {
+function HomeSettingsFormInner() {
   const [formData, setFormData] = useState({
     title: '',
     subtitle: '',
@@ -33,8 +34,8 @@ export default function HomeSettingsForm() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+
+  const toast = useToast();
 
   useEffect(() => {
     fetchPageSettings();
@@ -68,7 +69,7 @@ export default function HomeSettingsForm() {
       // Construir URL completa para preview
       setTestimonialPreview(testimonialImage ? getImageUrl(testimonialImage) : '');
     } catch (err: any) {
-      setError(err.message || 'Error al cargar la configuración');
+      toast.error(err.message || 'Error al cargar la configuración');
     } finally {
       setLoading(false);
     }
@@ -85,11 +86,9 @@ export default function HomeSettingsForm() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setError('');
-
     const validation = validateImageFile(file);
     if (!validation.valid) {
-      setError(validation.error || 'Archivo no válido');
+      toast.error(validation.error || 'Archivo no válido');
       return;
     }
 
@@ -99,15 +98,14 @@ export default function HomeSettingsForm() {
       const preview = await fileToBase64(file);
       setTestimonialPreview(preview);
     } catch (err) {
-      setError('Error al previsualizar la imagen');
+      toast.error('Error al previsualizar la imagen');
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
     setSaving(true);
+    toast.loading('Guardando configuración...');
 
     try {
       let dataToSend = { ...formData };
@@ -119,17 +117,17 @@ export default function HomeSettingsForm() {
       }
 
       await api.put('/pages/home', dataToSend);
-      setSuccess('Configuración de Home guardada exitosamente');
+      toast.dismiss('loading');
+      toast.success('Configuración de Home guardada exitosamente');
 
       // Actualizar el estado con la nueva imagen
       if (testimonialFile) {
         setFormData(dataToSend);
         setTestimonialFile(null);
       }
-
-      setTimeout(() => setSuccess(''), 3000);
     } catch (err: any) {
-      setError(err.message || 'Error al guardar la configuración');
+      toast.dismiss('loading');
+      toast.error(err.message || 'Error al guardar la configuración');
     } finally {
       setSaving(false);
     }
@@ -153,36 +151,6 @@ export default function HomeSettingsForm() {
           Gestiona el contenido principal y el testimonial de la página de inicio
         </p>
       </div>
-
-      {error && (
-        <div
-          style={{
-            backgroundColor: '#fee2e2',
-            color: '#991b1b',
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            marginBottom: '1.5rem',
-            borderLeft: '4px solid #dc2626',
-          }}
-        >
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div
-          style={{
-            backgroundColor: '#d1fae5',
-            color: '#065f46',
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            marginBottom: '1.5rem',
-            borderLeft: '4px solid #10b981',
-          }}
-        >
-          {success}
-        </div>
-      )}
 
       <form onSubmit={handleSubmit}>
         {/* Contenido de la Página */}
@@ -392,5 +360,14 @@ export default function HomeSettingsForm() {
         </div>
       </form>
     </div>
+  );
+}
+
+// Componente exportado con ToastProvider
+export default function HomeSettingsForm() {
+  return (
+    <ToastProvider>
+      <HomeSettingsFormInner />
+    </ToastProvider>
   );
 }

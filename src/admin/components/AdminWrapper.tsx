@@ -1,13 +1,12 @@
 /**
- * Wrapper que incluye el ToastProvider para todos los componentes del admin
- * Uso: envolver cualquier componente que necesite acceso a Toast
+ * Wrapper para paginas del admin que provee el ToastProvider
+ * Envuelve el contenido con el contexto necesario para Toast
  */
 
-import { type ReactNode } from 'react';
 import { ToastProvider } from './Toast';
 
 interface AdminWrapperProps {
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 export default function AdminWrapper({ children }: AdminWrapperProps) {

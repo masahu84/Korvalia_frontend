@@ -69,29 +69,44 @@ const STATUS_LABELS: Record<PropertyStatus, string> = {
   RENTED: 'Alquilado',
 };
 
+// Opciones de elementos por página
+const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
+
 function PropertyTableInner() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const { showLoading, updateToast } = useToast();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalProperties, setTotalProperties] = useState(0);
+  const [searchTerm, setSearchTerm] = useState('');
+  const toast = useToast();
+
+  // Calcular total de páginas
+  const totalPages = Math.ceil(totalProperties / pageSize);
 
   useEffect(() => {
     fetchProperties();
-  }, []);
+  }, [currentPage, pageSize]);
 
   const fetchProperties = async () => {
     try {
       setLoading(true);
       setError('');
-      const response = await api.get('/properties', { requiresAuth: false });
+
+      const offset = (currentPage - 1) * pageSize;
+      const response = await api.get(`/properties?limit=${pageSize}&offset=${offset}`, { requiresAuth: false });
 
       // El backend devuelve { data: { properties, total, count } }
       if (response?.data?.properties && Array.isArray(response.data.properties)) {
         setProperties(response.data.properties);
+        setTotalProperties(response.data.total || response.data.properties.length);
       } else if (response?.properties && Array.isArray(response.properties)) {
         setProperties(response.properties);
+        setTotalProperties(response.total || response.properties.length);
       } else {
         setProperties([]);
+        setTotalProperties(0);
       }
     } catch (err: any) {
       console.error('Error fetching properties:', err);
@@ -101,19 +116,92 @@ function PropertyTableInner() {
     }
   };
 
+  // Cambiar página
+  const goToPage = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  // Cambiar tamaño de página
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setCurrentPage(1); // Volver a la primera página
+  };
+
+  // Filtrar propiedades por búsqueda (cliente)
+  const filteredProperties = searchTerm
+    ? properties.filter(p =>
+        p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        p.city?.name?.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : properties;
+
+  // Generar array de páginas a mostrar
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages + 2) {
+      // Mostrar todas las páginas si hay pocas
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Siempre mostrar primera página
+      pages.push(1);
+
+      if (currentPage > 3) {
+        pages.push('...');
+      }
+
+      // Páginas alrededor de la actual
+      const start = Math.max(2, currentPage - 1);
+      const end = Math.min(totalPages - 1, currentPage + 1);
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+
+      if (currentPage < totalPages - 2) {
+        pages.push('...');
+      }
+
+      // Siempre mostrar última página
+      pages.push(totalPages);
+    }
+
+    return pages;
+  };
+
+  // Calcular rango de elementos mostrados
+  const startItem = totalProperties === 0 ? 0 : (currentPage - 1) * pageSize + 1;
+  const endItem = Math.min(currentPage * pageSize, totalProperties);
+
   const handleDelete = async (id: number, title: string) => {
     if (!confirm(`¿Estás seguro de eliminar la propiedad "${title}"?`)) {
       return;
     }
 
-    const loadingId = showLoading('Eliminando propiedad...');
+    toast.loading('Eliminando propiedad...');
 
     try {
       await api.delete(`/properties/${id}`);
-      setProperties(properties.filter((p) => p.id !== id));
-      updateToast(loadingId, 'success', 'Propiedad eliminada correctamente');
+      toast.success('Propiedad eliminada correctamente');
+
+      // Actualizar el total y recargar
+      const newTotal = totalProperties - 1;
+      setTotalProperties(newTotal);
+
+      // Si la página actual queda vacía, ir a la anterior
+      const newTotalPages = Math.ceil(newTotal / pageSize);
+      if (currentPage > newTotalPages && newTotalPages > 0) {
+        setCurrentPage(newTotalPages);
+      } else {
+        fetchProperties();
+      }
     } catch (err: any) {
-      updateToast(loadingId, 'error', err.message || 'Error al eliminar la propiedad');
+      toast.error(err.message || 'Error al eliminar la propiedad');
     }
   };
 
@@ -160,16 +248,66 @@ function PropertyTableInner() {
   return (
     <div className="admin-card">
       <div className="admin-card-header">
-        <div className="admin-flex-between">
+        <div className="admin-flex-between" style={{ flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <h2 className="admin-card-title">Propiedades</h2>
             <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.5rem' }}>
-              Total: {properties.length} propiedades
+              <strong>{totalProperties}</strong> propiedades en total
             </p>
           </div>
           <a href="/admin/properties/new" className="admin-btn admin-btn-primary">
-            ➕ Nueva Propiedad
+            + Nueva Propiedad
           </a>
+        </div>
+
+        {/* Barra de controles: búsqueda y selector de página */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginTop: '1.5rem',
+          flexWrap: 'wrap',
+          gap: '1rem'
+        }}>
+          {/* Búsqueda */}
+          <div style={{ flex: '1', minWidth: '200px', maxWidth: '400px' }}>
+            <input
+              type="text"
+              placeholder="Buscar por título o ciudad..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '0.625rem 1rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '8px',
+                fontSize: '0.875rem',
+              }}
+            />
+          </div>
+
+          {/* Selector de elementos por página */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <label style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+              Mostrar:
+            </label>
+            <select
+              value={pageSize}
+              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+              style={{
+                padding: '0.5rem 0.75rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '8px',
+                fontSize: '0.875rem',
+                backgroundColor: 'white',
+                cursor: 'pointer',
+              }}
+            >
+              {PAGE_SIZE_OPTIONS.map(size => (
+                <option key={size} value={size}>{size} por página</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -189,7 +327,7 @@ function PropertyTableInner() {
             </tr>
           </thead>
           <tbody>
-            {properties.map((property) => (
+            {filteredProperties.map((property) => (
               <tr key={property.id}>
                 <td>
                   {property.images && property.images.length > 0 ? (
@@ -320,11 +458,167 @@ function PropertyTableInner() {
           </tbody>
         </table>
       </div>
+
+      {/* Paginación */}
+      {totalPages > 0 && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '1rem 1.5rem',
+          borderTop: '1px solid #e5e7eb',
+          backgroundColor: '#f9fafb',
+          flexWrap: 'wrap',
+          gap: '1rem',
+        }}>
+          {/* Info de resultados */}
+          <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+            Mostrando <strong>{startItem}</strong> - <strong>{endItem}</strong> de <strong>{totalProperties}</strong> propiedades
+          </div>
+
+          {/* Controles de paginación */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+            {/* Botón Primera página */}
+            <button
+              onClick={() => goToPage(1)}
+              disabled={currentPage === 1}
+              style={{
+                padding: '0.5rem 0.75rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                backgroundColor: currentPage === 1 ? '#f3f4f6' : 'white',
+                color: currentPage === 1 ? '#9ca3af' : '#374151',
+                cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                fontSize: '0.875rem',
+              }}
+              title="Primera página"
+            >
+              ««
+            </button>
+
+            {/* Botón Anterior */}
+            <button
+              onClick={() => goToPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              style={{
+                padding: '0.5rem 0.75rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                backgroundColor: currentPage === 1 ? '#f3f4f6' : 'white',
+                color: currentPage === 1 ? '#9ca3af' : '#374151',
+                cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                fontSize: '0.875rem',
+              }}
+              title="Página anterior"
+            >
+              «
+            </button>
+
+            {/* Números de página */}
+            {getPageNumbers().map((page, index) => (
+              typeof page === 'number' ? (
+                <button
+                  key={index}
+                  onClick={() => goToPage(page)}
+                  style={{
+                    padding: '0.5rem 0.875rem',
+                    border: page === currentPage ? '1px solid #3b82f6' : '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    backgroundColor: page === currentPage ? '#3b82f6' : 'white',
+                    color: page === currentPage ? 'white' : '#374151',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    fontWeight: page === currentPage ? '600' : '400',
+                    minWidth: '40px',
+                  }}
+                >
+                  {page}
+                </button>
+              ) : (
+                <span
+                  key={index}
+                  style={{
+                    padding: '0.5rem 0.5rem',
+                    color: '#9ca3af',
+                    fontSize: '0.875rem',
+                  }}
+                >
+                  {page}
+                </span>
+              )
+            ))}
+
+            {/* Botón Siguiente */}
+            <button
+              onClick={() => goToPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              style={{
+                padding: '0.5rem 0.75rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                backgroundColor: currentPage === totalPages ? '#f3f4f6' : 'white',
+                color: currentPage === totalPages ? '#9ca3af' : '#374151',
+                cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                fontSize: '0.875rem',
+              }}
+              title="Página siguiente"
+            >
+              »
+            </button>
+
+            {/* Botón Última página */}
+            <button
+              onClick={() => goToPage(totalPages)}
+              disabled={currentPage === totalPages}
+              style={{
+                padding: '0.5rem 0.75rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                backgroundColor: currentPage === totalPages ? '#f3f4f6' : 'white',
+                color: currentPage === totalPages ? '#9ca3af' : '#374151',
+                cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                fontSize: '0.875rem',
+              }}
+              title="Última página"
+            >
+              »»
+            </button>
+          </div>
+
+          {/* Ir a página específica */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <label style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+              Ir a:
+            </label>
+            <input
+              type="number"
+              min={1}
+              max={totalPages}
+              value={currentPage}
+              onChange={(e) => {
+                const page = parseInt(e.target.value);
+                if (!isNaN(page)) goToPage(page);
+              }}
+              style={{
+                width: '60px',
+                padding: '0.5rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                fontSize: '0.875rem',
+                textAlign: 'center',
+              }}
+            />
+            <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+              de {totalPages}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-// Componente exportado que incluye el ToastProvider
+// Componente exportado con ToastProvider
 export default function PropertyTable() {
   return (
     <ToastProvider>

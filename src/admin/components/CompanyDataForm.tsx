@@ -5,6 +5,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
 import { uploadImage, validateImageFile, fileToBase64 } from '../lib/upload';
+import { useToast, ToastProvider } from './Toast';
 
 interface CompanyData {
   companyName: string;
@@ -21,7 +22,7 @@ interface CompanyData {
   logoUrl: string;
 }
 
-export default function CompanyDataForm() {
+function CompanyDataFormInner() {
   const [formData, setFormData] = useState<CompanyData>({
     companyName: '',
     slogan: '',
@@ -42,8 +43,8 @@ export default function CompanyDataForm() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+
+  const toast = useToast();
 
   useEffect(() => {
     fetchSettings();
@@ -82,7 +83,7 @@ export default function CompanyDataForm() {
       // Construir URL completa para preview
       setLogoPreview(logoUrl ? getImageUrl(logoUrl) : '');
     } catch (err: any) {
-      setError(err.message || 'Error al cargar los datos');
+      toast.error(err.message || 'Error al cargar los datos');
     } finally {
       setLoading(false);
     }
@@ -99,11 +100,9 @@ export default function CompanyDataForm() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setError('');
-
     const validation = validateImageFile(file);
     if (!validation.valid) {
-      setError(validation.error || 'Archivo no válido');
+      toast.error(validation.error || 'Archivo no válido');
       return;
     }
 
@@ -113,15 +112,14 @@ export default function CompanyDataForm() {
       const preview = await fileToBase64(file);
       setLogoPreview(preview);
     } catch (err) {
-      setError('Error al previsualizar la imagen');
+      toast.error('Error al previsualizar la imagen');
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
     setSaving(true);
+    toast.loading('Guardando datos de la empresa...');
 
     try {
       let dataToSend = { ...formData };
@@ -133,17 +131,17 @@ export default function CompanyDataForm() {
       }
 
       await api.put('/settings', dataToSend);
-      setSuccess('Datos de la empresa guardados exitosamente');
+      toast.dismiss('loading');
+      toast.success('Datos de la empresa guardados exitosamente');
 
       // Actualizar el estado con el nuevo logo
       if (logoFile) {
         setFormData(dataToSend);
         setLogoFile(null);
       }
-
-      setTimeout(() => setSuccess(''), 3000);
     } catch (err: any) {
-      setError(err.message || 'Error al guardar los datos');
+      toast.dismiss('loading');
+      toast.error(err.message || 'Error al guardar los datos');
     } finally {
       setSaving(false);
     }
@@ -159,36 +157,6 @@ export default function CompanyDataForm() {
 
   return (
     <div>
-      {error && (
-        <div
-          style={{
-            backgroundColor: '#fee2e2',
-            color: '#991b1b',
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            marginBottom: '1.5rem',
-            borderLeft: '4px solid #dc2626',
-          }}
-        >
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div
-          style={{
-            backgroundColor: '#d1fae5',
-            color: '#065f46',
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            marginBottom: '1.5rem',
-            borderLeft: '4px solid #10b981',
-          }}
-        >
-          {success}
-        </div>
-      )}
-
       <form onSubmit={handleSubmit}>
         {/* Información básica */}
         <div className="admin-card" style={{ marginBottom: '2rem' }}>
@@ -482,5 +450,14 @@ export default function CompanyDataForm() {
         </div>
       </form>
     </div>
+  );
+}
+
+// Componente exportado con ToastProvider
+export default function CompanyDataForm() {
+  return (
+    <ToastProvider>
+      <CompanyDataFormInner />
+    </ToastProvider>
   );
 }

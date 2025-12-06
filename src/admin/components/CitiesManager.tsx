@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
+import { useToast, ToastProvider } from './Toast';
 
 interface City {
   id: number;
@@ -18,14 +19,14 @@ interface City {
   };
 }
 
-export default function CitiesManager() {
+function CitiesManagerInner() {
   const [cities, setCities] = useState<City[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [editingCity, setEditingCity] = useState<City | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
+  const toast = useToast();
 
   // Estado del formulario
   const [formData, setFormData] = useState({
@@ -46,7 +47,7 @@ export default function CitiesManager() {
       const response = await api.get('/cities', { requiresAuth: false });
       setCities(response.data || []);
     } catch (err: any) {
-      setError(err.message || 'Error al cargar las ciudades');
+      toast.error(err.message || 'Error al cargar las ciudades');
     } finally {
       setLoading(false);
     }
@@ -62,13 +63,13 @@ export default function CitiesManager() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
 
     if (!formData.name.trim()) {
-      setError('El nombre es obligatorio');
+      toast.error('El nombre es obligatorio');
       return;
     }
+
+    toast.loading(editingCity ? 'Actualizando ciudad...' : 'Creando ciudad...');
 
     try {
       const dataToSend: any = {
@@ -87,17 +88,19 @@ export default function CitiesManager() {
 
       if (editingCity) {
         await api.put(`/cities/${editingCity.id}`, dataToSend);
-        setSuccess('Ciudad actualizada exitosamente');
+        toast.dismiss('loading');
+        toast.success('Ciudad actualizada exitosamente');
       } else {
         await api.post('/cities', dataToSend);
-        setSuccess('Ciudad creada exitosamente');
+        toast.dismiss('loading');
+        toast.success('Ciudad creada exitosamente');
       }
 
       fetchCities();
       handleCancel();
-      setTimeout(() => setSuccess(''), 3000);
     } catch (err: any) {
-      setError(err.message || 'Error al guardar la ciudad');
+      toast.dismiss('loading');
+      toast.error(err.message || 'Error al guardar la ciudad');
     }
   };
 
@@ -118,15 +121,16 @@ export default function CitiesManager() {
       return;
     }
 
+    toast.loading('Eliminando ciudad...');
+
     try {
-      setError('');
-      setSuccess('');
       await api.delete(`/cities/${id}`);
-      setSuccess('Ciudad eliminada exitosamente');
+      toast.dismiss('loading');
+      toast.success('Ciudad eliminada exitosamente');
       fetchCities();
-      setTimeout(() => setSuccess(''), 3000);
     } catch (err: any) {
-      setError(err.message || 'Error al eliminar la ciudad');
+      toast.dismiss('loading');
+      toast.error(err.message || 'Error al eliminar la ciudad');
     }
   };
 
@@ -140,7 +144,6 @@ export default function CitiesManager() {
       latitude: '',
       longitude: '',
     });
-    setError('');
   };
 
   const filteredCities = cities.filter(city =>
@@ -176,36 +179,6 @@ export default function CitiesManager() {
           Gestiona las ciudades donde la inmobiliaria tiene propiedades
         </p>
       </div>
-
-      {error && (
-        <div
-          style={{
-            backgroundColor: '#fee2e2',
-            color: '#991b1b',
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            marginBottom: '1.5rem',
-            borderLeft: '4px solid #dc2626',
-          }}
-        >
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div
-          style={{
-            backgroundColor: '#d1fae5',
-            color: '#065f46',
-            padding: '0.75rem 1rem',
-            borderRadius: '8px',
-            marginBottom: '1.5rem',
-            borderLeft: '4px solid #10b981',
-          }}
-        >
-          {success}
-        </div>
-      )}
 
       {showForm && (
         <div className="admin-card" style={{ marginBottom: '2rem' }}>
@@ -398,5 +371,14 @@ export default function CitiesManager() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Componente exportado con ToastProvider
+export default function CitiesManager() {
+  return (
+    <ToastProvider>
+      <CitiesManagerInner />
+    </ToastProvider>
   );
 }
