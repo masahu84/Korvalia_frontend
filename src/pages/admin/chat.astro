@@ -1,0 +1,31 @@
+---
+/**
+ * Gestión de Conversaciones del Chat
+ * Muestra leads y conversaciones del chatbot
+ */
+export const prerender = false;
+
+import AdminLayout from "../../admin/layouts/AdminLayout.astro";
+import AdminSidebar from "../../admin/components/AdminSidebar.tsx";
+import AdminTopbar from "../../admin/components/AdminTopbar.tsx";
+import ChatLeadsManager from "../../admin/components/ChatLeadsManager.tsx";
+---
+
+<AdminLayout title="Chat y Leads - Panel Admin">
+  <AdminSidebar client:load currentPath="/admin/chat" />
+
+  <div class="admin-main">
+    <AdminTopbar client:load />
+
+    <div class="admin-content">
+      <div class="admin-container">
+        <ChatLeadsManager client:load />
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  const token = localStorage.getItem("admin_token");
+  if (!token) window.location.href = "/admin/login";
+</script>

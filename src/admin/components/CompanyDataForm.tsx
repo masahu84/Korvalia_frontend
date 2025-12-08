@@ -131,7 +131,7 @@ function CompanyDataFormInner() {
       }
 
       await api.put('/settings', dataToSend);
-      toast.dismiss('loading');
+      toast.dismiss();
       toast.success('Datos de la empresa guardados exitosamente');
 
       // Actualizar el estado con el nuevo logo
@@ -140,7 +140,7 @@ function CompanyDataFormInner() {
         setLogoFile(null);
       }
     } catch (err: any) {
-      toast.dismiss('loading');
+      toast.dismiss();
       toast.error(err.message || 'Error al guardar los datos');
     } finally {
       setSaving(false);

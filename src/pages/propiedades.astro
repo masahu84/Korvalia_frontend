@@ -49,6 +49,8 @@ const url = new URL(Astro.request.url);
 const operation = url.searchParams.get("operation") || url.searchParams.get("op");
 const city = url.searchParams.get("city");
 const priceRange = url.searchParams.get("price");
+const minPrice = url.searchParams.get("minPrice");
+const maxPrice = url.searchParams.get("maxPrice");
 const searchQuery = url.searchParams.get("q");
 const isFeatured = url.searchParams.get("featured") === "true";
 const propertyType = url.searchParams.get("propertyType");
@@ -81,6 +83,12 @@ try {
   }
   if (priceRange) {
     params.append("priceRange", priceRange);
+  }
+  if (minPrice) {
+    params.append("minPrice", minPrice);
+  }
+  if (maxPrice) {
+    params.append("maxPrice", maxPrice);
   }
   if (propertyType) {
     params.append("propertyType", propertyType);
@@ -120,13 +128,8 @@ const totalPages = Math.ceil(totalResults / limit);
 const hasNextPage = page < totalPages;
 const hasPrevPage = page > 1;
 
-// Determinar el título según la operación y filtros
-let pageTitle = heroTitle;
-if (isFeatured) {
-  pageTitle = "Propiedades destacadas";
-} else if (operation === "RENT" || operation === "rent") {
-  pageTitle = "Propiedades en alquiler en Sanlúcar de Barrameda";
-}
+// El título siempre será el configurado desde el panel admin
+const pageTitle = heroTitle;
 
 // Filtrar solo imágenes activas y ordenarlas
 const activeHeroImages = heroImages
@@ -219,6 +222,8 @@ const activeHeroImages = heroImages
                     ...(operation && { operation }),
                     ...(city && { city }),
                     ...(priceRange && { price: priceRange }),
+                    ...(minPrice && { minPrice }),
+                    ...(maxPrice && { maxPrice }),
                     page: (page - 1).toString(),
                   }).toString()}#properties-grid`}
                   class="pagination-btn"
@@ -239,6 +244,8 @@ const activeHeroImages = heroImages
                     ...(operation && { operation }),
                     ...(city && { city }),
                     ...(priceRange && { price: priceRange }),
+                    ...(minPrice && { minPrice }),
+                    ...(maxPrice && { maxPrice }),
                     page: (page + 1).toString(),
                   }).toString()}#properties-grid`}
                   class="pagination-btn"

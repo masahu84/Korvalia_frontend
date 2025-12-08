@@ -1,6 +1,7 @@
 ---
 import Header from "./Header.astro";
 import Footer from "./Footer.astro";
+import ChatWidget from "../chat/ChatWidget";
 import "../../styles/global.css";
 
 interface Props {
@@ -30,5 +31,8 @@ const {
       <slot />
     </main>
     <Footer />
+
+    <!-- Chatbot Widget -->
+    <ChatWidget client:load />
   </body>
 </html>

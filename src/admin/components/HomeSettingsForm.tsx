@@ -117,7 +117,7 @@ function HomeSettingsFormInner() {
       }
 
       await api.put('/pages/home', dataToSend);
-      toast.dismiss('loading');
+      toast.dismiss();
       toast.success('Configuración de Home guardada exitosamente');
 
       // Actualizar el estado con la nueva imagen
@@ -126,7 +126,7 @@ function HomeSettingsFormInner() {
         setTestimonialFile(null);
       }
     } catch (err: any) {
-      toast.dismiss('loading');
+      toast.dismiss();
       toast.error(err.message || 'Error al guardar la configuración');
     } finally {
       setSaving(false);

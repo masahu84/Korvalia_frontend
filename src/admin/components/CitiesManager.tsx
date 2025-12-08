@@ -88,18 +88,18 @@ function CitiesManagerInner() {
 
       if (editingCity) {
         await api.put(`/cities/${editingCity.id}`, dataToSend);
-        toast.dismiss('loading');
+        toast.dismiss();
         toast.success('Ciudad actualizada exitosamente');
       } else {
         await api.post('/cities', dataToSend);
-        toast.dismiss('loading');
+        toast.dismiss();
         toast.success('Ciudad creada exitosamente');
       }
 
       fetchCities();
       handleCancel();
     } catch (err: any) {
-      toast.dismiss('loading');
+      toast.dismiss();
       toast.error(err.message || 'Error al guardar la ciudad');
     }
   };
@@ -125,11 +125,11 @@ function CitiesManagerInner() {
 
     try {
       await api.delete(`/cities/${id}`);
-      toast.dismiss('loading');
+      toast.dismiss();
       toast.success('Ciudad eliminada exitosamente');
       fetchCities();
     } catch (err: any) {
-      toast.dismiss('loading');
+      toast.dismiss();
       toast.error(err.message || 'Error al eliminar la ciudad');
     }
   };

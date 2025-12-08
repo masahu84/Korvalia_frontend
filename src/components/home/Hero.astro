@@ -1,5 +1,6 @@
 ---
 import HeroBackgroundSlider from "./HeroBackgroundSlider";
+import HeroSearch from "./HeroSearch";
 
 // Cargar configuración de la página Home y las imágenes del hero desde el backend
 const API_BASE = import.meta.env.PUBLIC_API_URL || "http://localhost:4000";
@@ -43,22 +44,25 @@ if (heroImages.length === 0) {
 }
 ---
 
-<section class="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
+<section class="relative h-[calc(100vh-80px)] min-h-[600px] flex items-center justify-center overflow-hidden">
   <!-- Fondo: slider dinámico con imágenes del admin -->
   <HeroBackgroundSlider slides={heroImages} interval={3500} client:load />
 
   <!-- Overlay oscuro para mejorar contraste del texto -->
-  <div class="absolute inset-0 bg-black/50"></div>
+  <div class="absolute inset-0 bg-black/40"></div>
 
   <!-- Contenido -->
   <div class="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <div class="flex flex-col items-center text-center">
+    <div class="flex flex-col items-center text-center gap-10">
       <!-- Título principal -->
       <h1
-        class="text-white font-heading font-bold text-[32px] sm:text-[40px] md:text-[56px] lg:text-[64px] leading-[1.1] max-w-4xl drop-shadow-2xl"
+        class="text-white font-heading font-normal text-[28px] sm:text-[36px] md:text-[48px] lg:text-[56px] leading-[1.15] max-w-4xl drop-shadow-2xl"
       >
         {title}
       </h1>
+
+      <!-- Buscador -->
+      <HeroSearch client:load />
     </div>
   </div>
 </section>

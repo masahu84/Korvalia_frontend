@@ -100,7 +100,7 @@ function HeroImagesManagerInner({ pageKey = 'home' }: HeroImagesManagerProps) {
 
       await Promise.all(uploadPromises);
 
-      toast.dismiss('loading');
+      toast.dismiss();
       toast.success(`${validFiles.length} imagen(es) subida(s) correctamente`);
 
       // Recargar imágenes
@@ -110,7 +110,7 @@ function HeroImagesManagerInner({ pageKey = 'home' }: HeroImagesManagerProps) {
       e.target.value = '';
     } catch (err: any) {
       console.error('Error al subir imágenes:', err);
-      toast.dismiss('loading');
+      toast.dismiss();
       toast.error(err.response?.data?.error || err.message || 'Error al subir las imágenes');
     } finally {
       setUploadingImages(false);
@@ -137,10 +137,10 @@ function HeroImagesManagerInner({ pageKey = 'home' }: HeroImagesManagerProps) {
     try {
       await api.delete(`/hero-images/${id}`);
       setImages(images.filter((img) => img.id !== id));
-      toast.dismiss('loading');
+      toast.dismiss();
       toast.success('Imagen eliminada');
     } catch (err: any) {
-      toast.dismiss('loading');
+      toast.dismiss();
       toast.error(err.response?.data?.error || err.message || 'Error al eliminar la imagen');
     }
   };
@@ -178,10 +178,10 @@ function HeroImagesManagerInner({ pageKey = 'home' }: HeroImagesManagerProps) {
       }));
 
       await api.put('/hero-images/bulk', { updates });
-      toast.dismiss('loading');
+      toast.dismiss();
       toast.success('Orden guardado correctamente');
     } catch (err: any) {
-      toast.dismiss('loading');
+      toast.dismiss();
       toast.error(err.response?.data?.error || err.message || 'Error al guardar el orden');
     } finally {
       setSaving(false);

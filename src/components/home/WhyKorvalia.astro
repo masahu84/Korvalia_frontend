@@ -40,9 +40,11 @@
           <div class="floating-card floating-card-1">
             <p class="floating-card-text">Transparencia en cada paso.</p>
           </div>
-          <div class="floating-card floating-card-2">
-            <span class="floating-icon">🏠</span>
-            <p class="floating-card-text">Selección real de inmuebles cuidada.</p>
+          <div class="floating-card-wrapper">
+            <img src="/icon.png" alt="Korvalia" class="floating-icon-img" />
+            <div class="floating-card floating-card-2">
+              <p class="floating-card-text">Selección real de inmuebles cuidada.</p>
+            </div>
           </div>
         </div>
       </div>
@@ -85,8 +87,8 @@
   }
 
   .section-subtitle {
-    font-size: 1rem;
-    color: #6a8074;
+    font-size: 1.5rem;
+    color: #39505d;
     text-align: center;
     margin: 0 0 2.5rem 0;
   }
@@ -117,40 +119,42 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    margin-right: -1.25rem; /* empuja la card hacia la imagen */
+    margin-right: -2.5rem; /* empuja la card hacia la imagen */
   }
 
   .benefit-card {
     background: #c8dce8;
-    padding: 2.5rem 2.25rem;
-    border-radius: 16px;
-    min-height: 330px;
-    max-width: 430px;
+    padding: 3.5rem 3rem;
+    border-radius: 20px;
+    min-height: 420px;
+    max-width: 540px;
     width: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    justify-content: center;
   }
 
   .benefit-title {
-    font-size: 1.25rem;
+    font-size: 1.45rem;
     font-weight: 600;
     color: #39505d;
-    margin: 0 0 0.75rem 0;
+    margin: 0 0 1.25rem 0;
+    line-height: 1.4;
   }
 
   .benefit-text {
-    font-size: 0.98rem;
+    font-size: 1.1rem;
     color: #39505d;
     font-weight: 500;
-    margin: 0 0 0.75rem 0;
+    margin: 0 0 1.15rem 0;
+    line-height: 1.65;
   }
 
   .benefit-description {
-    font-size: 0.9375rem;
-    line-height: 1.7;
+    font-size: 1.05rem;
+    line-height: 1.75;
     color: #6a8074;
-    margin: 0 0 1rem 0;
+    margin: 0 0 1.5rem 0;
   }
 
   .benefit-button {
@@ -158,7 +162,8 @@
     align-items: center;
     gap: 0.75rem;
     padding: 0.65rem 1.5rem;
-    background: #39505d;
+    /* background: #39505d; */
+    background: #133b34;
     color: white;
     border: none;
     border-radius: 8px;
@@ -225,32 +230,48 @@
     display: block;
   }
 
-  /* 🔼 Etiquetas flotantes más anchas */
+  /* 🔼 Etiquetas flotantes - texto en una línea */
   .floating-card {
-    position: absolute;
     background: white;
-    padding: 0.9rem 1.6rem;
+    padding: 1rem 1.75rem;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    max-width: 280px;
-    width: 260px; /* más width */
-    display: flex;
+    white-space: nowrap;
+    display: inline-flex;
     align-items: center;
-    gap: 0.75rem;
   }
 
   /* 🔁 Arriba a la IZQUIERDA, sobresaliendo */
   .floating-card-1 {
-    top: 12%;
-    left: -8%;
+    position: absolute;
+    top: 8%;
+    left: -12%;
     right: auto;
   }
 
-  /* 🔁 Abajo a la DERECHA, sobresaliendo */
-  .floating-card-2 {
+  /* 🔁 Wrapper para la segunda tarjeta con icono encima */
+  .floating-card-wrapper {
+    position: absolute;
     bottom: 10%;
-    right: -8%;
+    right: -10%;
     left: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .floating-icon-img {
+    width: 52px;
+    height: 52px;
+    margin-bottom: -12px;
+    margin-left: 12px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .floating-card-2 {
+    position: relative;
+    z-index: 1;
   }
 
   @media (max-width: 968px) {
@@ -271,33 +292,25 @@
     /* en móvil las metemos un poco más hacia dentro para que no se corten demasiado */
     .floating-card-1 {
       top: 6%;
-      left: 6%;
+      left: 4%;
       right: auto;
     }
 
-    .floating-card-2 {
+    .floating-card-wrapper {
       bottom: 8%;
-      right: 6%;
+      right: 4%;
       left: auto;
+    }
+
+    .floating-icon-img {
+      width: 44px;
+      height: 44px;
     }
   }
 
-  .floating-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    background: #39505d;
-    border-radius: 50%;
-    font-size: 1.25rem;
-    color: #ffffff;
-    flex-shrink: 0;
-  }
-
   .floating-card-text {
-    font-size: 0.875rem;
-    font-weight: 500;
+    font-size: 0.95rem;
+    font-weight: 600;
     color: #39505d;
     margin: 0;
     line-height: 1.4;

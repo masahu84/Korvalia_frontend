@@ -26,6 +26,7 @@ const navItems: NavItem[] = [
       { name: 'Ciudades', path: '/admin/properties/cities', icon: '🌍' },
     ]
   },
+  { name: 'Chat y Leads', path: '/admin/chat', icon: '💬' },
   { name: 'Home', path: '/admin/settings/home', icon: '🏡' },
   { name: 'Propiedades', path: '/admin/settings/properties', icon: '🔍' },
   { name: 'Sobre Korvalia', path: '/admin/settings/about', icon: 'ℹ️' },
