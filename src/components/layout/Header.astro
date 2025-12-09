@@ -40,8 +40,7 @@ try {
           <img
             src={logoUrl}
             alt={companyName}
-            class="h-10 sm:h-12 w-auto"
-            style="image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges;"
+            class="header-logo"
           />
         </a>
       </div>
@@ -105,6 +104,34 @@ try {
     </div>
   </nav>
 </header>
+
+<style>
+  .header-logo {
+    max-width: 180px;
+    height: auto;
+    max-height: 52px;
+    width: auto;
+    object-fit: contain;
+    /* Mejora la nitidez en pantallas de alta densidad */
+    image-rendering: -webkit-optimize-contrast;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  @media (max-width: 640px) {
+    .header-logo {
+      max-width: 120px;
+      max-height: 40px;
+    }
+  }
+
+  /* Para pantallas retina, forzar mejor renderizado */
+  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .header-logo {
+      image-rendering: auto;
+    }
+  }
+</style>
 
 <script>
   // Toggle mobile menu

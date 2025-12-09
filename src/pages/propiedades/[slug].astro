@@ -94,11 +94,21 @@ try {
 } catch (error) {
   console.error("Error al obtener propiedades similares:", error);
 }
+
+// Generar descripción SEO optimizada
+const seoDescription = property
+  ? `${property.title} en ${property.city}. ${property.bedrooms ? property.bedrooms + ' habitaciones, ' : ''}${property.bathrooms ? property.bathrooms + ' baños, ' : ''}${property.areaM2 ? property.areaM2 + 'm². ' : ''}${property.operation === 'SALE' ? 'En venta' : 'En alquiler'} por ${property.price?.toLocaleString('es-ES')}€. Contacta con Korvalia.`
+  : "Propiedad no disponible";
+
+const seoImage = property?.images?.[0] || "/og-image.jpg";
+const seoTitle = property
+  ? `${property.title} en ${property.city} | Korvalia Inmobiliaria`
+  : "Propiedad no encontrada | Korvalia";
 ---
 
 {/* Si no se encontró la propiedad, mostrar error */}
 {!property ? (
-  <MainLayout title="Propiedad no encontrada | Korvalia" description="La propiedad solicitada no existe o no está disponible.">
+  <MainLayout title="Propiedad no encontrada | Korvalia" description="La propiedad solicitada no existe o no está disponible." noindex={true}>
     <div style="text-align: center; padding: 6rem 2rem;">
       <h1 style="font-size: 2rem; color: #39505d; margin-bottom: 1rem;">Propiedad no encontrada</h1>
       <p style="color: #6b7280; margin-bottom: 2rem;">La propiedad que buscas no existe o ya no está disponible.</p>
@@ -108,7 +118,11 @@ try {
     </div>
   </MainLayout>
 ) : (
-<MainLayout title={`${property.title} | Korvalia`} description={property.description?.substring(0, 160) + "..." || ""}>
+<MainLayout
+  title={seoTitle}
+  description={seoDescription}
+  image={seoImage}
+>
   <!-- Hero con imagen e info en dos columnas -->
   <PropertyHeroWithInfo
     images={property.images}

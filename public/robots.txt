@@ -1,0 +1,9 @@
+# Robots.txt para Korvalia
+User-agent: *
+Allow: /
+
+# Bloquear páginas de admin
+Disallow: /admin/
+
+# Sitemap
+Sitemap: https://korvalia.es/sitemap.xml
