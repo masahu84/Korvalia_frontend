@@ -107,28 +107,14 @@ try {
 
 <style>
   .header-logo {
-    max-width: 180px;
-    height: auto;
-    max-height: 52px;
     width: auto;
-    object-fit: contain;
-    /* Mejora la nitidez en pantallas de alta densidad */
-    image-rendering: -webkit-optimize-contrast;
-    transform: translateZ(0);
-    backface-visibility: hidden;
+    height: 52px;
+    display: block;
   }
 
   @media (max-width: 640px) {
     .header-logo {
-      max-width: 120px;
-      max-height: 40px;
-    }
-  }
-
-  /* Para pantallas retina, forzar mejor renderizado */
-  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    .header-logo {
-      image-rendering: auto;
+      height: 44px;
     }
   }
 </style>
