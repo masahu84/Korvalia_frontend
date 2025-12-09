@@ -11,7 +11,7 @@ interface Props {
   noindex?: boolean;
 }
 
-const canonicalURL = new URL(Astro.url.pathname, 'https://korvalia.es');
+const canonicalURL = new URL(Astro.url.pathname, "https://korvalia.es");
 
 const {
   title = "Korvalia - Tu inmobiliaria de confianza",
@@ -30,11 +30,7 @@ const {
 
     <!-- SEO -->
     <link rel="canonical" href={canonicalURL} />
-    {noindex ? (
-      <meta name="robots" content="noindex, nofollow" />
-    ) : (
-      <meta name="robots" content="index, follow" />
-    )}
+    {noindex ? <meta name="robots" content="noindex, nofollow" /> : <meta name="robots" content="index, follow" />}
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
@@ -56,35 +52,40 @@ const {
     <meta name="geo.region" content="ES-CA" />
     <meta name="geo.placename" content="Sanlucar de Barrameda" />
 
-    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="icon" type="image/png" href="/favicon-korvalia.png" />
     <title>{title}</title>
 
     <!-- Schema.org JSON-LD para negocio local -->
-    <script is:inline type="application/ld+json" set:html={JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "RealEstateAgent",
-      "name": "Korvalia",
-      "description": "Inmobiliaria en Sanlúcar de Barrameda. Compra, venta y alquiler de propiedades con atención personalizada.",
-      "url": "https://korvalia.es",
-      "logo": "https://korvalia.es/logo.png",
-      "image": "https://korvalia.es/og-image.jpg",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Sanlúcar de Barrameda",
-        "addressRegion": "Cádiz",
-        "addressCountry": "ES"
-      },
-      "geo": {
-        "@type": "GeoCoordinates",
-        "latitude": "36.7783",
-        "longitude": "-6.3518"
-      },
-      "areaServed": {
-        "@type": "City",
-        "name": "Sanlúcar de Barrameda"
-      },
-      "priceRange": "€€"
-    })} />
+    <script
+      is:inline
+      type="application/ld+json"
+      set:html={JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "RealEstateAgent",
+        name: "Korvalia",
+        description:
+          "Inmobiliaria en Sanlúcar de Barrameda. Compra, venta y alquiler de propiedades con atención personalizada.",
+        url: "https://korvalia.es",
+        logo: "https://korvalia.es/logo.png",
+        image: "https://korvalia.es/og-image.jpg",
+        address: {
+          "@type": "PostalAddress",
+          addressLocality: "Sanlúcar de Barrameda",
+          addressRegion: "Cádiz",
+          addressCountry: "ES",
+        },
+        geo: {
+          "@type": "GeoCoordinates",
+          latitude: "36.7783",
+          longitude: "-6.3518",
+        },
+        areaServed: {
+          "@type": "City",
+          name: "Sanlúcar de Barrameda",
+        },
+        priceRange: "€€",
+      })}
+    />
 
     <slot name="head" />
   </head>
