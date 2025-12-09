@@ -275,9 +275,48 @@
   }
 
   @media (max-width: 968px) {
+    .why-korvalia {
+      padding-top: 2.5rem;
+    }
+
+    .why-korvalia::before {
+      height: 130px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .section-title {
+      font-size: 1.75rem;
+      margin-bottom: 0.25rem;
+      padding-top: 0.5rem;
+    }
+
+    .section-subtitle {
+      font-size: 1.15rem;
+      margin-bottom: 0;
+    }
+
     .benefits-column {
       align-items: center;
       margin-right: 0;
+    }
+
+    .benefit-card {
+      min-height: auto;
+      padding: 2rem 1.5rem;
+    }
+
+    .benefit-title {
+      font-size: 1.2rem;
+    }
+
+    .benefit-text {
+      font-size: 1rem;
+    }
+
+    .benefit-description {
+      font-size: 0.95rem;
     }
 
     .image-column {
@@ -305,6 +344,65 @@
     .floating-icon-img {
       width: 44px;
       height: 44px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .why-korvalia {
+      padding-top: 2rem;
+    }
+
+    .why-korvalia::before {
+      height: 110px;
+    }
+
+    .section-title {
+      font-size: 1.4rem;
+      padding-top: 0.25rem;
+    }
+
+    .section-subtitle {
+      font-size: 0.95rem;
+      margin-bottom: 0;
+    }
+
+    .why-content {
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
+    .benefit-card {
+      padding: 1.75rem 1.25rem;
+    }
+
+    .benefit-title {
+      font-size: 1.1rem;
+    }
+
+    .benefit-text {
+      font-size: 0.95rem;
+    }
+
+    .benefit-description {
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .image-wrapper {
+      height: 300px;
+    }
+
+    .floating-card {
+      padding: 0.75rem 1rem;
+    }
+
+    .floating-card-text {
+      font-size: 0.8rem;
+    }
+
+    .floating-icon-img {
+      width: 36px;
+      height: 36px;
     }
   }
 

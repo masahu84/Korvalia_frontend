@@ -5,7 +5,8 @@ const API_BASE = import.meta.env.PUBLIC_API_URL || "http://localhost:4000";
 // Valores por defecto
 let testimonialName = "Merche Silva";
 let testimonialRole = "La persona detrás de Korvalia";
-let testimonialText = "Korvalia está liderada por Merche Silva, cuya experiencia y manera de trabajar se basan en la claridad, la cercanía y el compromiso personal.\nSu objetivo es que cada cliente se sienta acompañado, escuchado y en un entorno de confianza desde el primer día.\nSu visión de una inmobiliaria más humana, más clara y más eficiente es la base del proyecto.";
+let testimonialText =
+  "Korvalia está liderada por Merche Silva, cuya experiencia y manera de trabajar se basan en la claridad, la cercanía y el compromiso personal.\nSu objetivo es que cada cliente se sienta acompañado, escuchado y en un entorno de confianza desde el primer día.\nSu visión de una inmobiliaria más humana, más clara y más eficiente es la base del proyecto.";
 let testimonialImage = "/merche.png";
 
 try {
@@ -42,8 +43,8 @@ try {
 // y mantener los saltos simples dentro de cada párrafo
 const paragraphs = testimonialText
   .split(/\n\n+/)
-  .map(p => p.trim())
-  .filter(p => p.length > 0);
+  .map((p) => p.trim())
+  .filter((p) => p.length > 0);
 ---
 
 <section class="testimonial">
@@ -52,11 +53,7 @@ const paragraphs = testimonialText
       <!-- Foto circular con borde -->
       <div class="testimonial-image-wrapper">
         <div class="image-circle">
-          <img
-            src={testimonialImage}
-            alt={testimonialName}
-            class="avatar"
-          />
+          <img src={testimonialImage} alt={testimonialName} class="avatar" />
         </div>
       </div>
 
@@ -65,7 +62,10 @@ const paragraphs = testimonialText
         <h2 class="testimonial-name">{testimonialName}</h2>
         <p class="testimonial-role">{testimonialRole}</p>
 
-        <div class="testimonial-description" set:html={`<p>${testimonialText.replace(/\n\n+/g, '</p><p>').replace(/\n/g, '<br/>')}</p>`} />
+        <div
+          class="testimonial-description"
+          set:html={`<p>${testimonialText.replace(/\n\n+/g, "</p><p>").replace(/\n/g, "<br/>")}</p>`}
+        />
       </div>
     </div>
   </div>
@@ -121,7 +121,7 @@ const paragraphs = testimonialText
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center top;
+    object-position: center 50%;
   }
 
   @media (max-width: 768px) {
