@@ -287,6 +287,7 @@ export default function ChatWidget() {
     <>
       {/* Botón flotante */}
       <button
+        className="chat-float-btn"
         onClick={() => {
           setIsOpen(!isOpen);
           setHasNewMessage(false);
@@ -295,8 +296,8 @@ export default function ChatWidget() {
           position: 'fixed',
           bottom: '24px',
           right: '24px',
-          width: '60px',
-          height: '60px',
+          width: '52px',
+          height: '52px',
           borderRadius: '50%',
           backgroundColor: '#3b82f6',
           border: 'none',
@@ -599,6 +600,15 @@ export default function ChatWidget() {
           }
           40% {
             transform: scale(1);
+          }
+        }
+
+        @media (max-width: 640px) {
+          .chat-float-btn {
+            width: 48px !important;
+            height: 48px !important;
+            bottom: 20px !important;
+            right: 20px !important;
           }
         }
       `}</style>

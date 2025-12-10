@@ -1,6 +1,7 @@
 ---
 import Header from "./Header.astro";
 import Footer from "./Footer.astro";
+import WhatsAppButton from "./WhatsAppButton.astro";
 import ChatWidget from "../chat/ChatWidget";
 import "../../styles/global.css";
 
@@ -95,6 +96,9 @@ const {
       <slot />
     </main>
     <Footer />
+
+    <!-- WhatsApp flotante -->
+    <WhatsAppButton />
 
     <!-- Chatbot Widget -->
     <ChatWidget client:load />
