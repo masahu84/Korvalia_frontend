@@ -3,6 +3,7 @@ import Header from "./Header.astro";
 import Footer from "./Footer.astro";
 import WhatsAppButton from "./WhatsAppButton.astro";
 import ChatWidget from "../chat/ChatWidget";
+import GlobalLoader from "../ui/GlobalLoader";
 import "../../styles/global.css";
 
 interface Props {
@@ -102,5 +103,8 @@ const {
 
     <!-- Chatbot Widget -->
     <ChatWidget client:load />
+
+    <!-- Global Loader para navegación -->
+    <GlobalLoader client:load text="Cargando propiedades..." />
   </body>
 </html>

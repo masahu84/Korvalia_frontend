@@ -1,0 +1,495 @@
+---
+/**
+ * Página de detalle de propiedad de Emblematic
+ *
+ * URL: /{reference}/{subtipo}-en-{localidad}-{zona}
+ * Ejemplo: /VA-862/piso-en-sanlucar-de-barrameda-centro
+ *
+ * Esta página obtiene los datos de la propiedad desde la API de Emblematic
+ * usando la referencia de la URL.
+ *
+ * Diseño idéntico a /propiedades/[slug].astro
+ */
+
+import MainLayout from '../../components/layout/MainLayout.astro';
+import PropertyHeroWithInfo from '../../components/property-detail/PropertyHeroWithInfo.astro';
+import MapAndContact from '../../components/property-detail/MapAndContact.astro';
+import PropertyGrid from '../../components/properties/PropertyGrid';
+import FinalCTA from '../../components/home/FinalCTA';
+import type { Property } from '../../types/property';
+
+const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:4000';
+
+// Placeholder para propiedades sin imagen
+const PLACEHOLDER_IMAGE = "https://placehold.co/800x600/e5e7eb/9ca3af?text=Sin+imagen";
+
+// Obtener parámetros de la URL
+const { reference, slug } = Astro.params;
+
+// Verificar que tenemos referencia
+if (!reference) {
+  return Astro.redirect('/inmuebles');
+}
+
+// Obtener datos de la propiedad desde nuestro backend
+let property: any = null;
+let error: string | null = null;
+let similarProperties: Property[] = [];
+
+try {
+  const response = await fetch(`${API_BASE}/api/emblematic/properties/${reference}`);
+  const result = await response.json();
+
+  if (result.success && result.data) {
+    property = result.data;
+
+    // Procesar imágenes - asegurar que tenemos al menos una
+    if (!property.images || property.images.length === 0) {
+      property.images = [PLACEHOLDER_IMAGE];
+    }
+  } else {
+    error = result.error || 'Propiedad no encontrada';
+  }
+} catch (e) {
+  console.error('Error obteniendo propiedad:', e);
+  error = 'Error al cargar la propiedad';
+}
+
+// Obtener propiedades similares de Emblematic
+if (property) {
+  try {
+    const similarRes = await fetch(`${API_BASE}/api/emblematic/properties?page=1`);
+    const similarResult = await similarRes.json();
+
+    if (similarResult.success && similarResult.data?.properties) {
+      // Excluir la propiedad actual comparando como strings
+      const currentRef = String(property.reference);
+      similarProperties = similarResult.data.properties
+        .filter((p: any) => String(p.reference) !== currentRef) // Excluir la actual
+        .slice(0, 3) // Tomar solo 3
+        .map((p: any) => ({
+          id: p.reference,
+          title: p.title,
+          slug: p.canonicalUrl, // URL tipo /3/piso-en-sanlucar
+          price: p.price || 0,
+          city: p.city || '',
+          neighborhood: p.zone || '',
+          operation: p.operation === 'RENT' ? 'ALQUILER' : 'VENTA',
+          propertyType: p.propertySubtype || p.propertyType || '',
+          areaM2: p.area || p.areaBuilt || null,
+          bedrooms: p.rooms || null,
+          bathrooms: p.bathrooms || null,
+          imageUrl: p.images?.[0] || PLACEHOLDER_IMAGE,
+        }));
+    }
+  } catch (e) {
+    console.error('Error obteniendo propiedades similares:', e);
+  }
+}
+
+// Formatear precio
+const formattedPrice = property ? new Intl.NumberFormat('es-ES', {
+  style: 'currency',
+  currency: 'EUR',
+  maximumFractionDigits: 0,
+}).format(property.price || 0) : '0€';
+
+// Etiqueta de operación
+const operationLabel = property?.operation === 'RENT' ? 'Alquiler' : 'Venta';
+
+// Ubicación
+const location = property?.zone ? `${property.city}, ${property.zone}` : property?.city || '';
+
+// SEO
+const seoTitle = property
+  ? `${property.title} en ${property.city} | Korvalia Inmobiliaria`
+  : 'Propiedad no encontrada | Korvalia';
+
+const seoDescription = property
+  ? `${property.propertySubtype || property.propertyType} en ${operationLabel.toLowerCase()} en ${location}. ${property.rooms ? property.rooms + ' habitaciones. ' : ''}${property.bathrooms ? property.bathrooms + ' baños. ' : ''}${property.area ? property.area + ' m². ' : ''}Precio: ${formattedPrice}`
+  : 'La propiedad solicitada no existe o no está disponible.';
+
+const seoImage = property?.images?.[0] || '/og-image.jpg';
+---
+
+{/* Si no se encontró la propiedad, mostrar error */}
+{!property ? (
+  <MainLayout title="Propiedad no encontrada | Korvalia" description="La propiedad solicitada no existe o no está disponible." noindex={true}>
+    <div style="text-align: center; padding: 6rem 2rem;">
+      <h1 style="font-size: 2rem; color: #39505d; margin-bottom: 1rem;">Propiedad no encontrada</h1>
+      <p style="color: #6b7280; margin-bottom: 2rem;">La propiedad que buscas no existe o ya no está disponible.</p>
+      <a href="/inmuebles" style="display: inline-block; padding: 0.875rem 2rem; background: #133b34; color: white; border-radius: 10px; text-decoration: none;">
+        Ver todos los inmuebles
+      </a>
+    </div>
+  </MainLayout>
+) : (
+<MainLayout
+  title={seoTitle}
+  description={seoDescription}
+  image={seoImage}
+>
+  <!-- Hero con imagen e info en dos columnas -->
+  <PropertyHeroWithInfo
+    images={property.images}
+    title={property.title}
+    price={property.price || 0}
+    operation={property.operation === 'RENT' ? 'RENT' : 'SALE'}
+    description={property.description || 'Sin descripción disponible'}
+    bedrooms={property.rooms}
+    bathrooms={property.bathrooms}
+    areaM2={property.area || property.areaBuilt}
+    city={property.city || ''}
+    neighborhood={property.zone}
+    address={`${property.city || ''}${property.zone ? ', ' + property.zone : ''}${property.region ? ' - ' + property.region : ''}`}
+  />
+
+  <!-- Características adicionales -->
+  <section class="features-section">
+    <div class="container">
+      <div class="features-grid">
+        <!-- Info principal -->
+        <div class="features-main">
+          <div class="property-meta">
+            <span class="meta-badge">{property.propertySubtype || property.propertyType}</span>
+            <span class={`meta-badge ${property.operation === 'RENT' ? 'rent' : 'sale'}`}>{operationLabel}</span>
+            {property.isVPO && <span class="meta-badge vpo">VPO</span>}
+            <span class="meta-reference">Ref: {property.reference}</span>
+          </div>
+
+          <!-- Características detalladas -->
+          {(property.hasElevator || property.hasGarage || property.hasPool || property.hasTerrace || property.hasGarden || property.floor !== undefined || property.areaBuilt) && (
+            <div class="extras-box">
+              <h3 class="extras-title">Características</h3>
+              <div class="extras-grid">
+                {property.floor !== undefined && (
+                  <span class="extra-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M3 21h18M9 8h1M9 12h1M9 16h1M14 8h1M14 12h1M14 16h1M5 21V5a2 2 0 012-2h10a2 2 0 012 2v16"/>
+                    </svg>
+                    Planta {property.floor === 0 ? 'Baja' : property.floor + 'ª'}
+                  </span>
+                )}
+                {property.areaBuilt && property.areaBuilt !== property.area && (
+                  <span class="extra-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    </svg>
+                    {property.areaBuilt} m² construidos
+                  </span>
+                )}
+                {property.hasElevator && (
+                  <span class="extra-item">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 2h10a2 2 0 012 2v16a2 2 0 01-2 2H7a2 2 0 01-2-2V4a2 2 0 012-2zm1 2v16h8V4H8zm4 2l3 4h-2v4h-2v-4H9l3-4z"/></svg>
+                    Ascensor
+                  </span>
+                )}
+                {property.hasGarage && (
+                  <span class="extra-item">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 20H5v-9l7-5 7 5v9zm-2-7.5L12 9l-5 3.5V18h10v-5.5z"/></svg>
+                    Garaje
+                  </span>
+                )}
+                {property.hasPool && (
+                  <span class="extra-item">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 15c1.67-.75 3.33-1.5 5-1.83V11h2v2.11c1.61.15 3.22.54 4.86 1.13l.14.05V11h2v3.71c1.65.72 3.3 1.62 5 2.29v2c-1.54-.58-3.07-1.32-4.58-2.02l-.42-.18V20h-2v-3.58c-1.57-.66-3.14-1.15-4.72-1.4l-.28-.05V20H7v-5.13c-1.67.33-3.33 1.08-5 1.83v-1.7zm20 4c-1.85-.68-3.7-1.48-5.55-2.13V11h-2v5.58c-1.62-.52-3.24-.9-4.86-1.11l-.14-.02V11H7v4.17c-1.67.33-3.33 1.08-5 1.83v2c1.67-.75 3.33-1.5 5-1.83V22h2v-5.03c1.65.24 3.29.63 4.93 1.17l.07.02V22h2v-4.29c1.65.68 3.3 1.45 4.95 2.11l.05.02v-1.84z"/></svg>
+                    Piscina
+                  </span>
+                )}
+                {property.hasTerrace && (
+                  <span class="extra-item">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/></svg>
+                    Terraza
+                  </span>
+                )}
+                {property.hasGarden && (
+                  <span class="extra-item">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22a9 9 0 01-9-9c0-1.95.63-3.78 1.69-5.27A9.03 9.03 0 0112 3a9.03 9.03 0 017.31 4.73A8.96 8.96 0 0121 13a9 9 0 01-9 9zm0-16a7 7 0 00-5.68 2.9A6.97 6.97 0 005 13a7 7 0 007 7 7 7 0 007-7c0-1.53-.49-2.96-1.32-4.1A7 7 0 0012 6z"/></svg>
+                    Jardín
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+
+          <!-- Certificado energético -->
+          {property.energyRating && (
+            <div class="energy-box">
+              <h3 class="energy-title">Certificado Energético</h3>
+              <div class="energy-content">
+                <span class={`energy-badge energy-${property.energyRating.toLowerCase()}`}>
+                  {property.energyRating}
+                </span>
+                {property.energyConsumption && (
+                  <span class="energy-value">Consumo: {property.energyConsumption} kWh/m²</span>
+                )}
+                {property.energyEmissions && (
+                  <span class="energy-value">Emisiones: {property.energyEmissions} kg CO₂/m²</span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mapa y Formulario de contacto -->
+  <MapAndContact
+    propertyTitle={property.title}
+    propertyId={parseInt(property.reference) || 0}
+    city={property.city || ''}
+    latitude={property.latitude}
+    longitude={property.longitude}
+    neighborhood={property.zone}
+  />
+
+  <!-- Propiedades similares -->
+  {similarProperties.length > 0 && (
+    <section class="similar-properties-section">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Otras propiedades que te pueden interesar</h2>
+          <p class="section-subtitle">Descubre más opciones similares en la zona</p>
+        </div>
+
+        <!-- Grid de propiedades similares -->
+        <PropertyGrid properties={similarProperties} client:load />
+
+        <div class="view-more-wrapper">
+          <a href="/inmuebles" class="btn-view-more">
+            Ver todos los inmuebles
+            <svg class="btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- CTA Final -->
+  <FinalCTA client:load source="cta_property_detail" />
+</MainLayout>
+)}
+
+<style>
+  /* Features Section */
+  .features-section {
+    padding: 2rem 0;
+    background: #f8fafc;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  .features-grid {
+    display: grid;
+    gap: 2rem;
+  }
+
+  .features-main {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .property-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .meta-badge {
+    padding: 0.375rem 0.875rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: #f3f4f6;
+    color: #374151;
+  }
+
+  .meta-badge.sale {
+    background: #133b34;
+    color: white;
+  }
+
+  .meta-badge.rent {
+    background: #3b82f6;
+    color: white;
+  }
+
+  .meta-badge.vpo {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .meta-reference {
+    font-size: 0.875rem;
+    color: #9ca3af;
+    margin-left: auto;
+  }
+
+  /* Extras box */
+  .extras-box {
+    margin-bottom: 1.5rem;
+  }
+
+  .extras-title,
+  .energy-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #39505d;
+    margin: 0 0 1rem 0;
+  }
+
+  .extras-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .extra-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #f3f4f6;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: #374151;
+  }
+
+  .extra-item svg {
+    width: 18px;
+    height: 18px;
+    color: #133b34;
+  }
+
+  /* Energy box */
+  .energy-box {
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+  }
+
+  .energy-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .energy-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: white;
+  }
+
+  .energy-a { background: #22c55e; }
+  .energy-b { background: #84cc16; }
+  .energy-c { background: #eab308; }
+  .energy-d { background: #f97316; }
+  .energy-e { background: #ef4444; }
+  .energy-f { background: #dc2626; }
+  .energy-g { background: #991b1b; }
+
+  .energy-value {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  /* Similar Properties */
+  .similar-properties-section {
+    padding: 4rem 0;
+    background: #f8fafc;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .section-title {
+    font-family: "Montserrat", system-ui, sans-serif;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #39505d;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .section-subtitle {
+    font-size: 1rem;
+    color: #6a8074;
+    margin: 0;
+  }
+
+  .view-more-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 2.5rem;
+  }
+
+  .btn-view-more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2rem;
+    background: #133b34;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-view-more:hover {
+    background: #0f2d27;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(19, 59, 52, 0.3);
+  }
+
+  .btn-icon {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.2s;
+  }
+
+  .btn-view-more:hover .btn-icon {
+    transform: translateX(4px);
+  }
+
+  @media (max-width: 768px) {
+    .features-section {
+      padding: 1.5rem 0;
+    }
+
+    .features-main {
+      padding: 1.5rem;
+    }
+
+    .similar-properties-section {
+      padding: 3rem 0;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+    }
+
+    .meta-reference {
+      margin-left: 0;
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+  }
+</style>

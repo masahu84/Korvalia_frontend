@@ -7,15 +7,6 @@ const API_BASE = import.meta.env.PUBLIC_API_URL ?? "http://localhost:4000";
 // Placeholder para propiedades sin imagen
 const PLACEHOLDER_IMAGE = "https://placehold.co/800x600/e5e7eb/9ca3af?text=Sin+imagen";
 
-// Helper para construir URLs completas de imágenes
-function getImageUrl(url: string): string {
-  if (!url) return PLACEHOLDER_IMAGE;
-  if (url.startsWith("http://") || url.startsWith("https://")) {
-    return url;
-  }
-  return url.startsWith("/") ? `${API_BASE}${url}` : `${API_BASE}/${url}`;
-}
-
 let allProperties: Property[] = [];
 let homeSubtitle = "Una nueva forma de vivir y de vender en Sanlúcar"; // Valor por defecto
 
@@ -32,35 +23,46 @@ try {
   console.error("Error al obtener configuración de home", error);
 }
 
+// Obtener propiedades SOLO del CRM Emblematic (propiedades destacadas/latest)
 try {
-  // Solicitar todas las propiedades destacadas (limit=100)
-  const res = await fetch(`${API_BASE}/api/properties/featured?limit=100`);
-  if (res.ok) {
-    const json = await res.json();
-    allProperties =
-      (json.data ?? []).map((p: any) => ({
-        id: p.id,
-        title: p.title,
-        slug: p.slug,
-        price: p.price,
-        city: p.city?.name ?? p.city ?? "",
-        neighborhood: p.neighborhood ?? "",
-        operation: p.operation,
-        propertyType: p.propertyType,
-        areaM2: p.areaM2,
-        bedrooms: p.bedrooms,
-        bathrooms: p.bathrooms,
-        imageUrl: getImageUrl(p.images?.[0]?.url || p.mainImageUrl || ""),
-        isFeatured: true, // Las propiedades destacadas siempre tienen isFeatured: true
-      })) || [];
+  const emblematicRes = await fetch(`${API_BASE}/api/emblematic/properties/featured`);
+  console.log("Emblematic response:", emblematicRes);
+  if (emblematicRes.ok) {
+    const emblematicJson = await emblematicRes.json();
+    if (emblematicJson.success && emblematicJson.data) {
+      // Usar propiedades destacadas primero, si no hay usar las últimas
+      const emblematicProperties = [
+        ...(emblematicJson.data.featured || []),
+        ...(emblematicJson.data.latest || []),
+      ];
+
+      if (emblematicProperties.length > 0) {
+        allProperties = emblematicProperties.map((p: any) => ({
+          id: p.reference,
+          title: p.title,
+          slug: p.canonicalUrl,
+          price: p.price,
+          city: p.city ?? "",
+          neighborhood: p.zone ?? "",
+          operation: p.operation === "RENT" ? "ALQUILER" : "VENTA",
+          propertyType: p.propertySubtype ?? p.propertyType ?? "",
+          areaM2: p.area ?? p.areaBuilt ?? 0,
+          bedrooms: p.rooms ?? 0,
+          bathrooms: p.bathrooms ?? 0,
+          imageUrl: p.images?.[0] || PLACEHOLDER_IMAGE,
+          isFeatured: true,
+        }));
+      }
+    }
   }
 } catch (error) {
-  console.error("Error al obtener propiedades destacadas", error);
+  console.error("Error al obtener propiedades de Emblematic:", error);
 }
 
 // Mostrar solo las primeras 6 propiedades
 const properties = allProperties.slice(0, 6);
 const hasMore = allProperties.length > 6;
+const hasProperties = properties.length > 0;
 ---
 
 <section class="bg-white pt-20 lg:pt-28 pb-20 lg:pb-24">
@@ -73,7 +75,7 @@ const hasMore = allProperties.length > 6;
 
       <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
         <a
-          href="/propiedades"
+          href="/inmuebles"
           class="inline-flex items-center justify-center rounded-md px-7 py-3 text-sm font-semibold text-white transition"
           style="background: #133b34;"
           onmouseover="this.style.background='#0f2d27'"
@@ -153,30 +155,54 @@ const hasMore = allProperties.length > 6;
           const input = document.getElementById("home-search") as HTMLInputElement;
           const query = input?.value?.trim();
           if (query) {
-            window.location.href = `/propiedades?q=${encodeURIComponent(query)}&page=1#properties-grid`;
+            window.location.href = `/inmuebles?q=${encodeURIComponent(query)}&page=1`;
           }
         });
       </script>
 
-      <!-- Grid de propiedades (pisando un poco el fondo celeste, resto blanco) -->
-      <PropertyGrid properties={properties} client:load />
+      <!-- Grid de propiedades o mensaje si no hay -->
+      {hasProperties ? (
+        <Fragment>
+          <PropertyGrid properties={properties} client:load />
 
-      <!-- Botón "Ver más" si hay más de 6 propiedades -->
-      {
-        hasMore && (
-          <div class="text-center mt-12 lg:mt-14">
-            <a
-              href="/propiedades?featured=true"
-              class="inline-flex items-center justify-center rounded-md px-8 py-3 text-sm font-semibold text-white transition"
-              style="background: #133b34;"
-              onmouseover="this.style.background='#0f2d27'"
-              onmouseout="this.style.background='#133b34'"
-            >
-              Ver más propiedades
-            </a>
+          <!-- Botón "Ver más" si hay más de 6 propiedades -->
+          {hasMore && (
+            <div class="text-center mt-12 lg:mt-14">
+              <a
+                href="/inmuebles"
+                class="inline-flex items-center justify-center rounded-md px-8 py-3 text-sm font-semibold text-white transition"
+                style="background: #133b34;"
+                onmouseover="this.style.background='#0f2d27'"
+                onmouseout="this.style.background='#133b34'"
+              >
+                Ver más propiedades
+              </a>
+            </div>
+          )}
+        </Fragment>
+      ) : (
+        <div class="bg-white rounded-2xl shadow-sm p-12 text-center max-w-2xl mx-auto">
+          <div class="mb-6">
+            <svg class="w-20 h-20 mx-auto text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
           </div>
-        )
-      }
+          <h4 class="text-xl font-semibold text-gray-800 mb-3">Próximamente disponibles</h4>
+          <p class="text-gray-500 mb-6 leading-relaxed">
+            Estamos preparando una selección exclusiva de propiedades para ti.
+            Muy pronto podrás explorar las mejores opciones del mercado.
+          </p>
+          <a
+            href="/contacto"
+            class="inline-flex items-center justify-center rounded-md px-6 py-3 text-sm font-semibold text-white transition"
+            style="background: #133b34;"
+            onmouseover="this.style.background='#0f2d27'"
+            onmouseout="this.style.background='#133b34'"
+          >
+            Contáctanos para más información
+          </a>
+        </div>
+      )}
     </div>
   </div>
 </section>

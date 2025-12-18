@@ -17,18 +17,21 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { name: 'Dashboard', path: '/admin/dashboard', icon: '📊' },
-  {
-    name: 'Viviendas',
-    path: '/admin/properties',
-    icon: '🏠',
-    subItems: [
-      { name: 'Listado', path: '/admin/properties', icon: '📋' },
-      { name: 'Ciudades', path: '/admin/properties/cities', icon: '🌍' },
-    ]
-  },
+  { name: 'Interesados', path: '/admin/interested', icon: '📞' },
+  // OCULTO: Viviendas - Descomentariar si se deja de usar Emblematic CRM
+  // Las propiedades ahora se gestionan directamente desde Emblematic
+  // {
+  //   name: 'Viviendas',
+  //   path: '/admin/properties',
+  //   icon: '🏠',
+  //   subItems: [
+  //     { name: 'Listado', path: '/admin/properties', icon: '📋' },
+  //     { name: 'Ciudades', path: '/admin/properties/cities', icon: '🌍' },
+  //   ]
+  // },
   { name: 'Chat y Leads', path: '/admin/chat', icon: '💬' },
   { name: 'Home', path: '/admin/settings/home', icon: '🏡' },
-  { name: 'Propiedades', path: '/admin/settings/properties', icon: '🔍' },
+  { name: 'Inmuebles', path: '/admin/settings/properties', icon: '🔍' },
   { name: 'Sobre Korvalia', path: '/admin/settings/about', icon: 'ℹ️' },
   { name: 'Contacto', path: '/admin/settings/contact', icon: '📧' },
   { name: 'Datos Empresa', path: '/admin/company', icon: '🏢' },
@@ -37,7 +40,7 @@ const navItems: NavItem[] = [
 
 export default function AdminSidebar({ currentPath = '' }: SidebarProps) {
   const [activePath, setActivePath] = useState(currentPath);
-  const [expandedItems, setExpandedItems] = useState<string[]>(['/admin/properties']);
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {

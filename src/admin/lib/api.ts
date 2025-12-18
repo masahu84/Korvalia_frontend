@@ -44,8 +44,8 @@ export async function apiFetch<T = any>(
 ): Promise<T> {
   const { requiresAuth = true, headers = {}, ...restOptions } = options;
 
-  const fetchHeaders: HeadersInit = {
-    ...headers,
+  const fetchHeaders: Record<string, string> = {
+    ...(headers as Record<string, string>),
   };
 
   // Añadir token si se requiere autenticación

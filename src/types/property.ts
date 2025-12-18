@@ -1,5 +1,7 @@
-export type OperationType = "RENT" | "SALE";
+// Tipos de operación: soporta tanto valores locales como del CRM
+export type OperationType = "RENT" | "SALE" | "ALQUILER" | "VENTA";
 
+// Tipos de propiedad: soporta tanto valores locales (enum) como del CRM (texto libre)
 export type PropertyType =
   | "FLAT"
   | "HOUSE"
@@ -10,10 +12,11 @@ export type PropertyType =
   | "GARAGE"
   | "ROOM"
   | "OTHER"
-  | "APARTMENT";
+  | "APARTMENT"
+  | string; // Permite tipos de texto libre del CRM (ej: "Piso", "Casa", etc.)
 
 export interface Property {
-  id: number;
+  id: number | string; // string para referencias de Emblematic
   title: string;
   slug: string;
   price: number;

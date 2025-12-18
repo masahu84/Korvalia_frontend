@@ -1,9 +1,12 @@
 /**
  * Componente Dashboard con estadísticas
+ * NOTA: Las propiedades ahora se gestionan desde Emblematic CRM
  */
 
 import { useState, useEffect } from 'react';
-import { api } from '../lib/api';
+
+// URL base de la API
+const API_BASE = (typeof window !== 'undefined' && (window as any).__ENV__?.PUBLIC_API_URL) || 'http://localhost:4000';
 
 interface Stats {
   totalProperties: number;
@@ -11,12 +14,6 @@ interface Stats {
   saleProperties: number;
   featuredProperties: number;
   totalCities: number;
-  lastProperty?: {
-    id: number;
-    title: string;
-    operation: string;
-    createdAt: string;
-  };
 }
 
 export default function Dashboard() {
@@ -38,23 +35,29 @@ export default function Dashboard() {
     try {
       setLoading(true);
 
-      // Cargar propiedades y ciudades en paralelo
-      const [propertiesRes, citiesRes] = await Promise.all([
-        api.get('/properties'),
-        api.get('/cities').catch(() => ({ data: [] })),
+      // Cargar estadísticas de Emblematic (propiedades) y ciudades
+      const [emblematicRes, citiesRes] = await Promise.all([
+        fetch(`${API_BASE}/api/emblematic/properties?page=1`).then(r => r.json()).catch(() => ({ success: false })),
+        fetch(`${API_BASE}/api/emblematic/cities`).then(r => r.json()).catch(() => ({ success: false, data: [] })),
       ]);
 
-      // La API devuelve { success, data: { properties: [...] } }
-      const properties = propertiesRes.data?.properties || propertiesRes.data || [];
-      const cities = Array.isArray(citiesRes.data) ? citiesRes.data : [];
+      // Contar propiedades por tipo de operación desde Emblematic
+      const totalProperties = emblematicRes.success ? (emblematicRes.data?.pagination?.total || emblematicRes.data?.properties?.length || 0) : 0;
+      const cities = citiesRes.success ? (citiesRes.data || []) : [];
+
+      // Para obtener las propiedades por tipo, hacemos llamadas adicionales
+      const [rentRes, saleRes, featuredRes] = await Promise.all([
+        fetch(`${API_BASE}/api/emblematic/properties?mode_id=2&page=1`).then(r => r.json()).catch(() => ({ success: false })),
+        fetch(`${API_BASE}/api/emblematic/properties?mode_id=1&page=1`).then(r => r.json()).catch(() => ({ success: false })),
+        fetch(`${API_BASE}/api/emblematic/featured`).then(r => r.json()).catch(() => ({ success: false, data: [] })),
+      ]);
 
       const calculatedStats: Stats = {
-        totalProperties: properties.length,
-        rentProperties: properties.filter((p: any) => p.operation === 'ALQUILER' || p.operation === 'RENT').length,
-        saleProperties: properties.filter((p: any) => p.operation === 'VENTA' || p.operation === 'SALE').length,
-        featuredProperties: properties.filter((p: any) => p.featured || p.isFeatured).length,
+        totalProperties,
+        rentProperties: rentRes.success ? (rentRes.data?.pagination?.total || rentRes.data?.properties?.length || 0) : 0,
+        saleProperties: saleRes.success ? (saleRes.data?.pagination?.total || saleRes.data?.properties?.length || 0) : 0,
+        featuredProperties: featuredRes.success ? (featuredRes.data?.length || 0) : 0,
         totalCities: cities.length,
-        lastProperty: properties.length > 0 ? properties[0] : undefined,
       };
 
       setStats(calculatedStats);
@@ -211,47 +214,44 @@ export default function Dashboard() {
               {stats.featuredProperties}
             </p>
             <p style={{ fontSize: '0.875rem', color: '#6b7280', textAlign: 'center' }}>
-              propiedades marcadas como destacadas
+              propiedades marcadas como destacadas en Emblematic
             </p>
           </div>
         </div>
 
         <div className="admin-card">
           <div className="admin-card-header">
-            <h2 className="admin-card-title">Última Propiedad</h2>
+            <h2 className="admin-card-title">Gestión de Propiedades</h2>
           </div>
-          {stats.lastProperty ? (
-            <div>
-              <p style={{ fontSize: '1.125rem', fontWeight: '600', color: '#111827', marginBottom: '0.5rem' }}>
-                {stats.lastProperty.title}
-              </p>
-              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.75rem' }}>
-                <span
-                  className={
-                    stats.lastProperty.operation === 'ALQUILER'
-                      ? 'admin-badge admin-badge-success'
-                      : 'admin-badge admin-badge-warning'
-                  }
-                >
-                  {stats.lastProperty.operation}
-                </span>
-              </div>
-              <p style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-                Creada el {new Date(stats.lastProperty.createdAt).toLocaleDateString('es-ES')}
-              </p>
-              <a
-                href={`/admin/properties/${stats.lastProperty.id}`}
-                className="admin-btn admin-btn-primary"
-                style={{ marginTop: '1rem', display: 'inline-flex' }}
-              >
-                Ver propiedad
-              </a>
+          <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+            <div
+              style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '12px',
+                backgroundColor: '#dbeafe',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '2rem',
+                margin: '0 auto 1rem',
+              }}
+            >
+              🏢
             </div>
-          ) : (
-            <p style={{ color: '#6b7280', textAlign: 'center', padding: '2rem 0' }}>
-              No hay propiedades aún
+            <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1rem' }}>
+              Las propiedades se gestionan desde Emblematic CRM
             </p>
-          )}
+            <a
+              href="https://app.emblematic.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="admin-btn admin-btn-primary"
+              style={{ display: 'inline-flex' }}
+            >
+              Ir a Emblematic
+            </a>
+          </div>
         </div>
       </div>
 
@@ -260,6 +260,7 @@ export default function Dashboard() {
           <h2 className="admin-card-title">Acciones Rápidas</h2>
         </div>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          {/* OCULTO: Gestión local de propiedades - Descomentar si se deja de usar Emblematic
           <a href="/admin/properties/new" className="admin-btn admin-btn-primary">
             + Nueva Propiedad
           </a>
@@ -269,11 +270,18 @@ export default function Dashboard() {
           <a href="/admin/properties/cities" className="admin-btn admin-btn-secondary">
             Gestionar ciudades
           </a>
-          <a href="/admin/settings/home" className="admin-btn admin-btn-secondary">
+          */}
+          <a href="/admin/settings/home" className="admin-btn admin-btn-primary">
             Configurar Home
+          </a>
+          <a href="/admin/settings/properties" className="admin-btn admin-btn-secondary">
+            Configurar página propiedades
           </a>
           <a href="/admin/company" className="admin-btn admin-btn-secondary">
             Datos empresa
+          </a>
+          <a href="/admin/chat" className="admin-btn admin-btn-secondary">
+            Chat y Leads
           </a>
         </div>
       </div>

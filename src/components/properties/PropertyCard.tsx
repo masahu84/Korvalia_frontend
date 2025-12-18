@@ -1,9 +1,11 @@
 import React from "react";
-import type { Property, PropertyType } from "../../types/property";
+import type { Property } from "../../types/property";
+import { showGlobalLoader } from "../ui/GlobalLoader";
 
 type PropertyCardProps = Property;
 
-const propertyTypeTranslations: Record<PropertyType, string> = {
+// Traducciones para tipos de propiedad conocidos (enum local)
+const propertyTypeTranslations: Record<string, string> = {
   FLAT: "Piso",
   HOUSE: "Casa",
   PENTHOUSE: "Ático",
@@ -15,6 +17,16 @@ const propertyTypeTranslations: Record<PropertyType, string> = {
   ROOM: "Habitación",
   OTHER: "Otro",
 };
+
+// Helper para obtener el nombre legible del tipo de propiedad
+function getPropertyTypeName(type: string): string {
+  // Si es un tipo conocido (enum), usar la traducción
+  if (propertyTypeTranslations[type]) {
+    return propertyTypeTranslations[type];
+  }
+  // Si no, devolver el tipo tal cual (ya viene en español del CRM)
+  return type || "Inmueble";
+}
 
 // Imagen placeholder por defecto - imagen gris clara con texto
 const PLACEHOLDER_IMAGE = "https://placehold.co/800x600/e5e7eb/9ca3af?text=Sin+imagen";
@@ -44,9 +56,17 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 
   const showLocation = neighborhood || city;
 
+  // Si el slug ya empieza con /, es una URL completa (Emblematic), si no, agregar /propiedades/
+  const propertyUrl = slug.startsWith('/') ? slug : `/propiedades/${slug}`;
+
+  const handleClick = () => {
+    showGlobalLoader();
+  };
+
   return (
     <a
-      href={`/propiedades/${slug}`}
+      href={propertyUrl}
+      onClick={handleClick}
       className="group block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-shadow duration-300"
     >
       {/* Imagen */}
@@ -61,7 +81,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           {/* Badge de operación (Venta/Alquiler) */}
           <span className="inline-flex items-center rounded-md bg-[#39505d] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white">
-            {operation === "SALE" ? "Venta" : "Alquiler"}
+            {operation === "SALE" || operation === "VENTA" ? "Venta" : "Alquiler"}
           </span>
 
           {/* Badge Destacada - solo si isFeatured es true */}
@@ -82,7 +102,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         <div className="mb-1">
           <div className="text-[22px] sm:text-2xl font-semibold text-slate-900">
             <span>{formattedAmount}</span>
-            {operation === "RENT" && <span className="ml-1 text-sm font-normal text-slate-500">/mes</span>}
+            {(operation === "RENT" || operation === "ALQUILER") && <span className="ml-1 text-sm font-normal text-slate-500">/mes</span>}
           </div>
         </div>
 
@@ -91,7 +111,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 
         {/* Línea de ubicación (tipo Figma: "calle x") */}
         <p className="text-sm text-slate-500 mb-4 line-clamp-1">
-          {showLocation || propertyTypeTranslations[propertyType]}
+          {showLocation || getPropertyTypeName(propertyType)}
         </p>
 
         {/* Separador */}

@@ -1,0 +1,31 @@
+---
+/**
+ * Gestión de Personas Interesadas
+ * Muestra los leads que han dejado su teléfono
+ */
+export const prerender = false;
+
+import AdminLayout from "../../admin/layouts/AdminLayout.astro";
+import AdminSidebar from "../../admin/components/AdminSidebar.tsx";
+import AdminTopbar from "../../admin/components/AdminTopbar.tsx";
+import InterestedLeadsManager from "../../admin/components/InterestedLeadsManager.tsx";
+---
+
+<AdminLayout title="Interesados - Panel Admin">
+  <AdminSidebar client:load currentPath="/admin/interested" />
+
+  <div class="admin-main">
+    <AdminTopbar client:load />
+
+    <div class="admin-content">
+      <div class="admin-container">
+        <InterestedLeadsManager client:load />
+      </div>
+    </div>
+  </div>
+</AdminLayout>
+
+<script>
+  const token = localStorage.getItem("admin_token");
+  if (!token) window.location.href = "/admin/login";
+</script>
