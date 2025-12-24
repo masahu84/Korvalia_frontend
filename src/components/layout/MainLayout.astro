@@ -21,6 +21,9 @@ const {
   image = "/og-image.jpg",
   noindex = false,
 } = Astro.props;
+
+// Construir URL de imagen correctamente (puede venir como URL absoluta o relativa)
+const ogImage = image.startsWith('http') ? image : `https://korvalia.es${image}`;
 ---
 
 <!doctype html>
@@ -39,7 +42,7 @@ const {
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={`https://korvalia.es${image}`} />
+    <meta property="og:image" content={ogImage} />
     <meta property="og:locale" content="es_ES" />
     <meta property="og:site_name" content="Korvalia" />
 
@@ -48,7 +51,7 @@ const {
     <meta name="twitter:url" content={canonicalURL} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={`https://korvalia.es${image}`} />
+    <meta name="twitter:image" content={ogImage} />
 
     <!-- Geo -->
     <meta name="geo.region" content="ES-CA" />
