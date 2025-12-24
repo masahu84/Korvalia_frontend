@@ -57,6 +57,21 @@ const location = zone ? `${city}, ${zone}` : city;
     <img src={mainImage} alt={title} loading="lazy" />
     <span class={`operation-badge ${operationClass}`}>{operationLabel}</span>
     <span class="reference-badge">Ref: {reference}</span>
+    <button
+      class="share-button"
+      data-title={title}
+      data-url={`https://korvalia.es${canonicalUrl}`}
+      data-price={formattedPrice}
+      aria-label="Compartir propiedad"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="18" cy="5" r="3"/>
+        <circle cx="6" cy="12" r="3"/>
+        <circle cx="18" cy="19" r="3"/>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+      </svg>
+    </button>
   </div>
 
   <div class="property-content">
@@ -164,6 +179,39 @@ const location = zone ? `${city}, ${zone}` : city;
     font-weight: 500;
   }
 
+  .share-button {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s, box-shadow 0.2s;
+    z-index: 10;
+  }
+
+  .share-button:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .share-button:active {
+    transform: scale(0.95);
+  }
+
+  .share-button svg {
+    width: 20px;
+    height: 20px;
+    color: #133b34;
+  }
+
   .property-content {
     padding: 1.25rem;
   }
@@ -233,3 +281,49 @@ const location = zone ? `${city}, ${zone}` : city;
     }
   }
 </style>
+
+<script>
+  // Funcionalidad de compartir propiedad
+  document.addEventListener('click', async (e) => {
+    const button = (e.target as HTMLElement).closest('.share-button');
+    if (!button) return;
+
+    // Evitar que el click navegue al enlace de la card
+    e.preventDefault();
+    e.stopPropagation();
+
+    const title = button.getAttribute('data-title') || 'Propiedad en Korvalia';
+    const url = button.getAttribute('data-url') || window.location.href;
+    const price = button.getAttribute('data-price') || '';
+
+    const shareText = `${title} - ${price}\n\nMira esta propiedad en Korvalia:`;
+
+    // Usar Web Share API si está disponible (móviles)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: title,
+          text: shareText,
+          url: url,
+        });
+      } catch (err) {
+        // Usuario canceló o error
+        console.log('Compartir cancelado');
+      }
+    } else {
+      // Fallback para desktop: copiar al portapapeles
+      const fullText = `${shareText}\n${url}`;
+      try {
+        await navigator.clipboard.writeText(fullText);
+        // Mostrar feedback visual
+        const originalHTML = button.innerHTML;
+        button.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+        setTimeout(() => {
+          button.innerHTML = originalHTML;
+        }, 2000);
+      } catch (err) {
+        console.error('Error al copiar:', err);
+      }
+    }
+  });
+</script>

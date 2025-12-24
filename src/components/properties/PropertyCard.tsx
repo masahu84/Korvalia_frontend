@@ -4,6 +4,41 @@ import { showGlobalLoader } from "../ui/GlobalLoader";
 
 type PropertyCardProps = Property;
 
+// Función para compartir propiedad
+async function handleShare(
+  e: React.MouseEvent,
+  title: string,
+  price: string,
+  url: string
+) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  const shareText = `${title} - ${price}\n\nMira esta propiedad en Korvalia:`;
+  const fullUrl = `https://korvalia.es${url}`;
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: title,
+        text: shareText,
+        url: fullUrl,
+      });
+    } catch (err) {
+      console.log('Compartir cancelado');
+    }
+  } else {
+    // Fallback: copiar al portapapeles
+    const fullText = `${shareText}\n${fullUrl}`;
+    try {
+      await navigator.clipboard.writeText(fullText);
+      // El feedback visual se maneja en el componente
+    } catch (err) {
+      console.error('Error al copiar:', err);
+    }
+  }
+}
+
 // Traducciones para tipos de propiedad conocidos (enum local)
 const propertyTypeTranslations: Record<string, string> = {
   FLAT: "Piso",
@@ -45,6 +80,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   slug,
   isFeatured,
 }) => {
+  const [copied, setCopied] = React.useState(false);
+
   // Usar placeholder si no hay imagen
   const displayImage = imageUrl || PLACEHOLDER_IMAGE;
 
@@ -61,6 +98,15 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
 
   const handleClick = () => {
     showGlobalLoader();
+  };
+
+  const onShareClick = async (e: React.MouseEvent) => {
+    await handleShare(e, title, formattedAmount, propertyUrl);
+    // Mostrar feedback de copiado en desktop
+    if (!navigator.share) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (
@@ -94,6 +140,27 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             </span>
           )}
         </div>
+
+        {/* Botón compartir */}
+        <button
+          onClick={onShareClick}
+          className="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-md hover:scale-110 hover:shadow-lg active:scale-95 transition-all duration-200 z-10"
+          aria-label="Compartir propiedad"
+        >
+          {copied ? (
+            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          ) : (
+            <svg className="w-5 h-5 text-[#133b34]" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+              <circle cx="18" cy="5" r="3"/>
+              <circle cx="6" cy="12" r="3"/>
+              <circle cx="18" cy="19" r="3"/>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+            </svg>
+          )}
+        </button>
       </div>
 
       {/* Contenido */}
