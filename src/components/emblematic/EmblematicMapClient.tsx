@@ -133,24 +133,31 @@ const EmblematicMapClient: React.FC<EmblematicMapClientProps> = ({ apiBase }) =>
         // Filtrar solo propiedades con coordenadas válidas
         const validProperties: PropertyMarker[] = propertiesList
           .filter((p: any) => p.latitude && p.longitude && p.latitude !== 0 && p.longitude !== 0)
-          .map((p: any) => ({
-            id: p.reference,
-            reference: p.reference,
-            title: p.title,
-            slug: p.canonicalUrl,
-            price: p.price || 0,
-            operation: p.operation === "RENT" ? "RENT" : "SALE",
-            propertyType: p.propertyType || "",
-            propertySubtype: p.propertySubtype || "",
-            zone: p.zone || "",
-            city: p.city || "",
-            bedrooms: p.rooms,
-            bathrooms: p.bathrooms,
-            area: p.area || p.areaBuilt,
-            latitude: p.latitude,
-            longitude: p.longitude,
-            imageUrl: p.images?.[0] || PLACEHOLDER_IMAGE,
-          }));
+          .map((p: any) => {
+            // Generar título sin dirección exacta
+            const propertyTypeName = p.propertySubtype || p.propertyType || 'Inmueble';
+            const locationPart = p.zone ? `${p.zone}, ${p.city}` : p.city;
+            const safeTitle = `${propertyTypeName} en ${locationPart}`;
+
+            return {
+              id: p.reference,
+              reference: p.reference,
+              title: safeTitle,
+              slug: p.canonicalUrl,
+              price: p.price || 0,
+              operation: p.operation === "RENT" ? "RENT" : "SALE",
+              propertyType: p.propertyType || "",
+              propertySubtype: p.propertySubtype || "",
+              zone: p.zone || "",
+              city: p.city || "",
+              bedrooms: p.rooms,
+              bathrooms: p.bathrooms,
+              area: p.area || p.areaBuilt,
+              latitude: p.latitude,
+              longitude: p.longitude,
+              imageUrl: p.images?.[0] || PLACEHOLDER_IMAGE,
+            };
+          });
 
         setProperties(validProperties);
 

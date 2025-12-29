@@ -165,25 +165,33 @@ const ZoneMapClient: React.FC<ZoneMapClientProps> = ({ apiBase }) => {
         // Filtrar solo propiedades con coordenadas válidas
         const validProperties: PropertyMarker[] = properties
           .filter((p: any) => p.latitude && p.longitude)
-          .map((p: any) => ({
-            id: p.id,
-            title: p.title,
-            slug: p.slug,
-            price: p.price,
-            operation: p.operation,
-            propertyType: p.propertyType,
-            neighborhood: p.neighborhood,
-            city: p.city?.name || p.city || "",
-            citySlug: p.city?.slug || "",
-            bedrooms: p.bedrooms,
-            bathrooms: p.bathrooms,
-            areaM2: p.areaM2,
-            latitude: p.latitude,
-            longitude: p.longitude,
-            imageUrl: p.images?.[0]?.url
-              ? (p.images[0].url.startsWith("http") ? p.images[0].url : `${API_BASE}${p.images[0].url}`)
-              : PLACEHOLDER_IMAGE,
-          }));
+          .map((p: any) => {
+            // Generar título sin dirección exacta
+            const cityName = p.city?.name || p.city || "";
+            const propertyTypeName = p.propertyType || 'Inmueble';
+            const locationPart = p.neighborhood ? `${p.neighborhood}, ${cityName}` : cityName;
+            const safeTitle = `${propertyTypeName} en ${locationPart}`;
+
+            return {
+              id: p.id,
+              title: safeTitle,
+              slug: p.slug,
+              price: p.price,
+              operation: p.operation,
+              propertyType: p.propertyType,
+              neighborhood: p.neighborhood,
+              city: cityName,
+              citySlug: p.city?.slug || "",
+              bedrooms: p.bedrooms,
+              bathrooms: p.bathrooms,
+              areaM2: p.areaM2,
+              latitude: p.latitude,
+              longitude: p.longitude,
+              imageUrl: p.images?.[0]?.url
+                ? (p.images[0].url.startsWith("http") ? p.images[0].url : `${API_BASE}${p.images[0].url}`)
+                : PLACEHOLDER_IMAGE,
+            };
+          });
 
         setProperties(validProperties);
 

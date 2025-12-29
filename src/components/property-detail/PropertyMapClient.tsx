@@ -1,6 +1,5 @@
 import React from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import L from "leaflet";
+import { MapContainer, TileLayer, Circle, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 interface PropertyMapClientProps {
@@ -11,38 +10,20 @@ interface PropertyMapClientProps {
   neighborhood?: string;
 }
 
-// Crear icono personalizado para el marcador
-const createPropertyIcon = () => {
-  const size = 40;
-  return L.divIcon({
-    className: "custom-property-marker",
-    html: `
-      <div style="
-        width: ${size}px;
-        height: ${size}px;
-        background: #133b34;
-        border: 4px solid white;
-        border-radius: 50% 50% 50% 0;
-        transform: rotate(-45deg);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.35);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      ">
-        <svg
-          style="transform: rotate(45deg); width: ${size * 0.5}px; height: ${size * 0.5}px;"
-          fill="white"
-          viewBox="0 0 24 24"
-        >
-          <path d="M12 3L4 9v12h16V9l-8-6zm0 2.5L18 10v9H6v-9l6-4.5z"/>
-          <path d="M10 14h4v5h-4z"/>
-        </svg>
-      </div>
-    `,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size],
-    popupAnchor: [0, -size + 5],
-  });
+// Función para añadir un desplazamiento aleatorio a las coordenadas (privacidad)
+// Desplaza entre 100-300 metros en dirección aleatoria
+const addRandomOffset = (lat: number, lng: number): [number, number] => {
+  // Radio aleatorio entre 100 y 300 metros
+  const radiusMeters = 100 + Math.random() * 200;
+  // Ángulo aleatorio
+  const angle = Math.random() * 2 * Math.PI;
+
+  // Conversión aproximada: 1 grado de latitud ≈ 111,000 metros
+  const latOffset = (radiusMeters * Math.cos(angle)) / 111000;
+  // 1 grado de longitud varía según la latitud
+  const lngOffset = (radiusMeters * Math.sin(angle)) / (111000 * Math.cos(lat * Math.PI / 180));
+
+  return [lat + latOffset, lng + lngOffset];
 };
 
 // Componente para controlar el mapa
@@ -50,7 +31,8 @@ const MapController: React.FC<{ center: [number, number] }> = ({ center }) => {
   const map = useMap();
 
   React.useEffect(() => {
-    map.setView(center, 16);
+    // Zoom 14 para mostrar área más amplia (ubicación aproximada)
+    map.setView(center, 14);
   }, [center, map]);
 
   return null;
@@ -59,21 +41,22 @@ const MapController: React.FC<{ center: [number, number] }> = ({ center }) => {
 const PropertyMapClient: React.FC<PropertyMapClientProps> = ({
   lat = 36.7755,
   lng = -6.3515,
-  title = "Ubicación de la propiedad",
+  title = "Ubicación aproximada",
   city = "",
   neighborhood = "",
 }) => {
-  const center: [number, number] = [lat, lng];
+  // Usar React.useMemo para que el offset sea consistente durante el render
+  const offsetCenter = React.useMemo(() => addRandomOffset(lat, lng), [lat, lng]);
 
   // Tipos any para evitar problemas de tipos con Leaflet
   const AnyMapContainer = MapContainer as any;
   const AnyTileLayer = TileLayer as any;
-  const AnyMarker = Marker as any;
+  const AnyCircle = Circle as any;
 
   return (
     <AnyMapContainer
-      center={center}
-      zoom={16}
+      center={offsetCenter}
+      zoom={14}
       scrollWheelZoom={true}
       className="property-map-leaflet"
       zoomControl={true}
@@ -84,9 +67,19 @@ const PropertyMapClient: React.FC<PropertyMapClientProps> = ({
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
       />
 
-      <MapController center={center} />
+      <MapController center={offsetCenter} />
 
-      <AnyMarker position={center} icon={createPropertyIcon()}>
+      {/* Círculo de zona aproximada (radio 400 metros) */}
+      <AnyCircle
+        center={offsetCenter}
+        radius={400}
+        pathOptions={{
+          color: '#133b34',
+          fillColor: '#133b34',
+          fillOpacity: 0.15,
+          weight: 2,
+        }}
+      >
         <Popup className="property-detail-popup" maxWidth={280}>
           <div className="property-map-popup">
             <div className="popup-icon">
@@ -95,7 +88,7 @@ const PropertyMapClient: React.FC<PropertyMapClientProps> = ({
               </svg>
             </div>
             <div className="popup-text">
-              <p className="popup-title">{title}</p>
+              <p className="popup-title">Ubicación aproximada</p>
               <p className="popup-location">
                 {neighborhood && <span>{neighborhood}, </span>}
                 {city}
@@ -103,7 +96,7 @@ const PropertyMapClient: React.FC<PropertyMapClientProps> = ({
             </div>
           </div>
         </Popup>
-      </AnyMarker>
+      </AnyCircle>
     </AnyMapContainer>
   );
 };

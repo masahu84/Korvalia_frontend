@@ -103,21 +103,29 @@ try {
     const propertiesData = json.data?.properties || json.properties || json.data || [];
     totalResults = json.data?.total || propertiesData.length;
 
-    properties = propertiesData.map((p: any) => ({
-      id: p.id,
-      title: p.title,
-      slug: p.slug,
-      price: p.price,
-      city: p.city?.name ?? p.city ?? "",
-      neighborhood: p.neighborhood ?? "",
-      operation: p.operation,
-      propertyType: p.propertyType,
-      areaM2: p.areaM2,
-      bedrooms: p.bedrooms,
-      bathrooms: p.bathrooms,
-      imageUrl: getImageUrl(p.images?.[0]?.url || p.mainImageUrl || ""),
-      isFeatured: p.isFeatured ?? false,
-    }));
+    properties = propertiesData.map((p: any) => {
+      // Generar título sin dirección exacta
+      const cityName = p.city?.name ?? p.city ?? "";
+      const propertyTypeName = p.propertyType || 'Inmueble';
+      const locationPart = p.neighborhood ? `${p.neighborhood}, ${cityName}` : cityName;
+      const safeTitle = `${propertyTypeName} en ${locationPart}`;
+
+      return {
+        id: p.id,
+        title: safeTitle,
+        slug: p.slug,
+        price: p.price,
+        city: cityName,
+        neighborhood: p.neighborhood ?? "",
+        operation: p.operation,
+        propertyType: p.propertyType,
+        areaM2: p.areaM2,
+        bedrooms: p.bedrooms,
+        bathrooms: p.bathrooms,
+        imageUrl: getImageUrl(p.images?.[0]?.url || p.mainImageUrl || ""),
+        isFeatured: p.isFeatured ?? false,
+      };
+    });
   }
 } catch (error) {
   console.error("Error al obtener propiedades", error);

@@ -37,21 +37,28 @@ try {
       ];
 
       if (emblematicProperties.length > 0) {
-        allProperties = emblematicProperties.map((p: any) => ({
-          id: p.reference,
-          title: p.title,
-          slug: p.canonicalUrl,
-          price: p.price,
-          city: p.city ?? "",
-          neighborhood: p.zone ?? "",
-          operation: p.operation === "RENT" ? "ALQUILER" : "VENTA",
-          propertyType: p.propertySubtype ?? p.propertyType ?? "",
-          areaM2: p.area ?? p.areaBuilt ?? 0,
-          bedrooms: p.rooms ?? 0,
-          bathrooms: p.bathrooms ?? 0,
-          imageUrl: p.images?.[0] || PLACEHOLDER_IMAGE,
-          isFeatured: true,
-        }));
+        allProperties = emblematicProperties.map((p: any) => {
+          // Generar título sin dirección exacta
+          const propertyTypeName = p.propertySubtype || p.propertyType || 'Inmueble';
+          const locationPart = p.zone ? `${p.zone}, ${p.city}` : p.city;
+          const safeTitle = `${propertyTypeName} en ${locationPart}`;
+
+          return {
+            id: p.reference,
+            title: safeTitle,
+            slug: p.canonicalUrl,
+            price: p.price,
+            city: p.city ?? "",
+            neighborhood: p.zone ?? "",
+            operation: p.operation === "RENT" ? "ALQUILER" : "VENTA",
+            propertyType: p.propertySubtype ?? p.propertyType ?? "",
+            areaM2: p.area ?? p.areaBuilt ?? 0,
+            bedrooms: p.rooms ?? 0,
+            bathrooms: p.bathrooms ?? 0,
+            imageUrl: p.images?.[0] || PLACEHOLDER_IMAGE,
+            isFeatured: true,
+          };
+        });
       }
     }
   }

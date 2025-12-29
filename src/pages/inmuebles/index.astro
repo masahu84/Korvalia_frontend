@@ -99,21 +99,28 @@ try {
     }
 
     // Mapear propiedades de Emblematic al formato Property
-    properties = filteredProperties.map((p: any) => ({
-      id: p.reference,
-      title: p.title,
-      slug: p.canonicalUrl, // URL completa tipo /3/piso-en-sanlucar
-      price: p.price || 0,
-      city: p.city || '',
-      neighborhood: p.zone || '',
-      operation: p.operation === 'RENT' ? 'ALQUILER' : 'VENTA',
-      propertyType: p.propertySubtype || p.propertyType || '',
-      areaM2: p.area || p.areaBuilt || null,
-      bedrooms: p.rooms || null,
-      bathrooms: p.bathrooms || null,
-      imageUrl: p.images?.[0] || PLACEHOLDER_IMAGE,
-      isFeatured: false, // Emblematic no tiene campo destacado
-    }));
+    properties = filteredProperties.map((p: any) => {
+      // Generar título sin dirección exacta: "Piso en Centro, Sanlúcar"
+      const propertyTypeName = p.propertySubtype || p.propertyType || 'Inmueble';
+      const locationPart = p.zone ? `${p.zone}, ${p.city}` : p.city;
+      const safeTitle = `${propertyTypeName} en ${locationPart}`;
+
+      return {
+        id: p.reference,
+        title: safeTitle,
+        slug: p.canonicalUrl, // URL completa tipo /3/piso-en-sanlucar
+        price: p.price || 0,
+        city: p.city || '',
+        neighborhood: p.zone || '',
+        operation: p.operation === 'RENT' ? 'ALQUILER' : 'VENTA',
+        propertyType: p.propertySubtype || p.propertyType || '',
+        areaM2: p.area || p.areaBuilt || null,
+        bedrooms: p.rooms || null,
+        bathrooms: p.bathrooms || null,
+        imageUrl: p.images?.[0] || PLACEHOLDER_IMAGE,
+        isFeatured: false, // Emblematic no tiene campo destacado
+      };
+    });
   }
 } catch (error) {
   console.error('Error al obtener propiedades de Emblematic:', error);

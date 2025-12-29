@@ -67,20 +67,27 @@ if (property) {
       similarProperties = similarResult.data.properties
         .filter((p: any) => String(p.reference) !== currentRef) // Excluir la actual
         .slice(0, 3) // Tomar solo 3
-        .map((p: any) => ({
-          id: p.reference,
-          title: p.title,
-          slug: p.canonicalUrl, // URL tipo /3/piso-en-sanlucar
-          price: p.price || 0,
-          city: p.city || '',
-          neighborhood: p.zone || '',
-          operation: p.operation === 'RENT' ? 'ALQUILER' : 'VENTA',
-          propertyType: p.propertySubtype || p.propertyType || '',
-          areaM2: p.area || p.areaBuilt || null,
-          bedrooms: p.rooms || null,
-          bathrooms: p.bathrooms || null,
-          imageUrl: p.images?.[0] || PLACEHOLDER_IMAGE,
-        }));
+        .map((p: any) => {
+          // Generar título sin dirección exacta
+          const propertyTypeName = p.propertySubtype || p.propertyType || 'Inmueble';
+          const locationPart = p.zone ? `${p.zone}, ${p.city}` : p.city;
+          const safeTitle = `${propertyTypeName} en ${locationPart}`;
+
+          return {
+            id: p.reference,
+            title: safeTitle,
+            slug: p.canonicalUrl, // URL tipo /3/piso-en-sanlucar
+            price: p.price || 0,
+            city: p.city || '',
+            neighborhood: p.zone || '',
+            operation: p.operation === 'RENT' ? 'ALQUILER' : 'VENTA',
+            propertyType: p.propertySubtype || p.propertyType || '',
+            areaM2: p.area || p.areaBuilt || null,
+            bedrooms: p.rooms || null,
+            bathrooms: p.bathrooms || null,
+            imageUrl: p.images?.[0] || PLACEHOLDER_IMAGE,
+          };
+        });
     }
   } catch (e) {
     console.error('Error obteniendo propiedades similares:', e);
@@ -141,7 +148,6 @@ const seoImage = property?.images?.[0] || '/og-image.jpg';
     areaM2={property.area || property.areaBuilt}
     city={property.city || ''}
     neighborhood={property.zone}
-    address={`${property.city || ''}${property.zone ? ', ' + property.zone : ''}${property.region ? ' - ' + property.region : ''}`}
   />
 
   <!-- Características adicionales -->

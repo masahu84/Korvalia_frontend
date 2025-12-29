@@ -74,12 +74,18 @@ try {
             ? getImageUrl(p.images[0].url)
             : PLACEHOLDER_IMAGE;
 
+          // Generar título sin dirección exacta
+          const cityName = p.city?.name ?? p.city ?? "";
+          const propertyTypeName = p.propertyType || 'Inmueble';
+          const locationPart = p.neighborhood ? `${p.neighborhood}, ${cityName}` : cityName;
+          const safeTitle = `${propertyTypeName} en ${locationPart}`;
+
           return {
             id: p.id,
-            title: p.title,
+            title: safeTitle,
             slug: p.slug,
             price: p.price,
-            city: p.city?.name ?? p.city ?? "",
+            city: cityName,
             neighborhood: p.neighborhood ?? "",
             operation: p.operation,
             propertyType: p.propertyType,

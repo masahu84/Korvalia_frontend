@@ -114,10 +114,10 @@ const formatPrice = (price: number) => new Intl.NumberFormat('es-ES').format(pri
           </div>
         </div>
 
-        <!-- Dirección -->
+        <!-- Ubicación (solo zona, sin dirección exacta) -->
         <div class="address-section">
           <p class="address-text">
-            {address || `${city}${neighborhood ? `, ${neighborhood}` : ''} - Cádiz, Andalucía`}
+            {city}{neighborhood ? `, ${neighborhood}` : ''} - Cádiz, Andalucía
           </p>
         </div>
       </div>
