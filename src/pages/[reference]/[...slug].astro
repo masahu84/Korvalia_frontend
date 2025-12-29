@@ -23,6 +23,53 @@ const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:4000';
 // Placeholder para propiedades sin imagen
 const PLACEHOLDER_IMAGE = "https://placehold.co/800x600/e5e7eb/9ca3af?text=Sin+imagen";
 
+/**
+ * Función para sanitizar la descripción y eliminar direcciones exactas
+ * Elimina patrones como "Calle X, nº Y", "Av. X, 123", etc.
+ */
+function sanitizeDescription(description: string): string {
+  if (!description) return '';
+
+  let sanitized = description;
+
+  // Patrones de direcciones en español
+  const addressPatterns = [
+    // Calle/C./ con número
+    /\b(calle|c\.?|c\/)\s+[a-záéíóúñ\s]+,?\s*(n[º°]?\.?\s*)?\d+[a-z]?\b/gi,
+    // Avenida/Av./Avda. con número
+    /\b(avenida|av\.?|avda\.?)\s+[a-záéíóúñ\s]+,?\s*(n[º°]?\.?\s*)?\d+[a-z]?\b/gi,
+    // Plaza/Pl. con número
+    /\b(plaza|pl\.?)\s+[a-záéíóúñ\s]+,?\s*(n[º°]?\.?\s*)?\d+[a-z]?\b/gi,
+    // Paseo/Pº con número
+    /\b(paseo|p[º°]\.?)\s+[a-záéíóúñ\s]+,?\s*(n[º°]?\.?\s*)?\d+[a-z]?\b/gi,
+    // Camino/Cno. con número
+    /\b(camino|cno\.?)\s+[a-záéíóúñ\s]+,?\s*(n[º°]?\.?\s*)?\d+[a-z]?\b/gi,
+    // Urbanización/Urb. con número
+    /\b(urbanizaci[oó]n|urb\.?)\s+[a-záéíóúñ\s]+,?\s*(n[º°]?\.?\s*)?\d+[a-z]?\b/gi,
+    // Número de portal aislado tipo "nº 5" o "número 12"
+    /\b(n[º°]\.?|n[uú]mero)\s*\d+[a-z]?\b/gi,
+    // Bloque/Portal/Escalera con número
+    /\b(bloque|portal|escalera)\s*(n[º°]?\.?\s*)?\d+[a-z]?\b/gi,
+    // Piso/Puerta con letra o número
+    /\b(piso|pta\.?|puerta)\s*(n[º°]?\.?\s*)?\d*\s*[a-z]?\b/gi,
+  ];
+
+  for (const pattern of addressPatterns) {
+    sanitized = sanitized.replace(pattern, '');
+  }
+
+  // Limpiar espacios múltiples y comas huérfanas
+  sanitized = sanitized
+    .replace(/\s*,\s*,/g, ',')
+    .replace(/,\s*\./g, '.')
+    .replace(/\s+/g, ' ')
+    .replace(/^\s*,\s*/g, '')
+    .replace(/\s*,\s*$/g, '')
+    .trim();
+
+  return sanitized;
+}
+
 // Obtener parámetros de la URL
 const { reference, slug } = Astro.params;
 
@@ -107,9 +154,14 @@ const operationLabel = property?.operation === 'RENT' ? 'Alquiler' : 'Venta';
 // Ubicación
 const location = property?.zone ? `${property.city}, ${property.zone}` : property?.city || '';
 
+// Generar título seguro sin dirección exacta
+const propertyTypeName = property?.propertySubtype || property?.propertyType || 'Inmueble';
+const locationPart = property?.zone ? `${property.zone}, ${property.city}` : property?.city || '';
+const safeTitle = property ? `${propertyTypeName} en ${locationPart}` : '';
+
 // SEO
 const seoTitle = property
-  ? `${property.title} en ${property.city} | Korvalia Inmobiliaria`
+  ? `${safeTitle} | Korvalia Inmobiliaria`
   : 'Propiedad no encontrada | Korvalia';
 
 const seoDescription = property
@@ -139,10 +191,10 @@ const seoImage = property?.images?.[0] || '/og-image.jpg';
   <!-- Hero con imagen e info en dos columnas -->
   <PropertyHeroWithInfo
     images={property.images}
-    title={property.title}
+    title={safeTitle}
     price={property.price || 0}
     operation={property.operation === 'RENT' ? 'RENT' : 'SALE'}
-    description={property.description || 'Sin descripción disponible'}
+    description={sanitizeDescription(property.description) || 'Sin descripción disponible'}
     bedrooms={property.rooms}
     bathrooms={property.bathrooms}
     areaM2={property.area || property.areaBuilt}

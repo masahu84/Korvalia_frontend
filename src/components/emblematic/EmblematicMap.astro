@@ -277,6 +277,22 @@ import EmblematicMapClient from "./EmblematicMapClient";
     padding: 12px 14px 14px;
   }
 
+  :global(.popup-location-note) {
+    font-size: 0.7rem;
+    color: #6b7280;
+    margin: 0 0 4px 0;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  :global(.popup-location-note::before) {
+    content: "~";
+    font-weight: bold;
+    font-style: normal;
+  }
+
   :global(.popup-title) {
     font-size: 0.95rem;
     font-weight: 600;

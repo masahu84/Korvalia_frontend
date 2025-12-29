@@ -1,7 +1,39 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Circle, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+
+// Función para añadir un desplazamiento aleatorio a las coordenadas (privacidad)
+// Desplaza entre 100-300 metros en dirección aleatoria
+// Usa un seed basado en el id para que sea consistente para cada propiedad
+const addRandomOffset = (lat: number, lng: number, seed: string): [number, number] => {
+  // Generar número pseudo-aleatorio basado en el seed (referencia de la propiedad)
+  const hashCode = (str: string) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return Math.abs(hash);
+  };
+
+  const hash = hashCode(seed);
+  const pseudoRandom1 = (hash % 1000) / 1000;
+  const pseudoRandom2 = ((hash * 31) % 1000) / 1000;
+
+  // Radio aleatorio entre 100 y 300 metros
+  const radiusMeters = 100 + pseudoRandom1 * 200;
+  // Ángulo aleatorio
+  const angle = pseudoRandom2 * 2 * Math.PI;
+
+  // Conversión aproximada: 1 grado de latitud ≈ 111,000 metros
+  const latOffset = (radiusMeters * Math.cos(angle)) / 111000;
+  // 1 grado de longitud varía según la latitud
+  const lngOffset = (radiusMeters * Math.sin(angle)) / (111000 * Math.cos(lat * Math.PI / 180));
+
+  return [lat + latOffset, lng + lngOffset];
+};
 
 // Tipos
 interface PropertyMarker {
@@ -33,40 +65,9 @@ const SANLUCAR_CENTER: [number, number] = [36.7755, -6.3515];
 // Placeholder para propiedades sin imagen
 const PLACEHOLDER_IMAGE = "https://placehold.co/800x600/e5e7eb/9ca3af?text=Sin+imagen";
 
-// Crear icono personalizado para los marcadores
-const createCustomIcon = (operation: "SALE" | "RENT") => {
-  const color = operation === "SALE" ? "#133b34" : "#d97706";
-  const size = 32;
-
-  return L.divIcon({
-    className: "custom-marker",
-    html: `
-      <div style="
-        width: ${size}px;
-        height: ${size}px;
-        background: ${color};
-        border: 3px solid white;
-        border-radius: 50% 50% 50% 0;
-        transform: rotate(-45deg);
-        box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      ">
-        <svg
-          style="transform: rotate(45deg); width: ${size * 0.5}px; height: ${size * 0.5}px;"
-          fill="white"
-          viewBox="0 0 24 24"
-        >
-          <path d="M12 3L4 9v12h16V9l-8-6zm0 2.5L18 10v9H6v-9l6-4.5z"/>
-          <path d="M10 14h4v5h-4z"/>
-        </svg>
-      </div>
-    `,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size],
-    popupAnchor: [0, -size],
-  });
+// Colores para los círculos según operación
+const getCircleColor = (operation: "SALE" | "RENT") => {
+  return operation === "SALE" ? "#133b34" : "#d97706";
 };
 
 // Componente para recentrar el mapa
@@ -221,7 +222,7 @@ const EmblematicMapClient: React.FC<EmblematicMapClientProps> = ({ apiBase }) =>
   // Tipos any para evitar problemas de tipos con Leaflet
   const AnyMapContainer = MapContainer as any;
   const AnyTileLayer = TileLayer as any;
-  const AnyMarker = Marker as any;
+  const AnyCircle = Circle as any;
 
   if (loading) {
     return (
@@ -297,11 +298,11 @@ const EmblematicMapClient: React.FC<EmblematicMapClientProps> = ({ apiBase }) =>
       <div className="zone-map-legend">
         <div className="legend-item">
           <span className="legend-marker sale"></span>
-          <span>Venta</span>
+          <span>Venta (zona aproximada)</span>
         </div>
         <div className="legend-item">
           <span className="legend-marker rent"></span>
-          <span>Alquiler</span>
+          <span>Alquiler (zona aproximada)</span>
         </div>
       </div>
 
@@ -325,77 +326,89 @@ const EmblematicMapClient: React.FC<EmblematicMapClientProps> = ({ apiBase }) =>
             properties={filteredProperties}
           />
 
-          {filteredProperties.map((property) => (
-            <AnyMarker
-              key={property.id}
-              position={[property.latitude, property.longitude]}
-              icon={createCustomIcon(property.operation)}
-            >
-              <Popup className="property-popup" maxWidth={280} minWidth={250}>
-                <div className="popup-content">
-                  {property.imageUrl && (
-                    <div className="popup-image">
-                      <img
-                        src={property.imageUrl}
-                        alt={property.title}
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = PLACEHOLDER_IMAGE;
-                        }}
-                      />
-                      <span className={`popup-badge ${property.operation.toLowerCase()}`}>
-                        {property.operation === "SALE" ? "Venta" : "Alquiler"}
-                      </span>
-                    </div>
-                  )}
-                  <div className="popup-info">
-                    <h4 className="popup-title">{property.title}</h4>
-                    <p className="popup-price">{formatPrice(property.price, property.operation)}</p>
-                    <div className="popup-details">
-                      <span className="popup-type">{property.propertySubtype}</span>
-                      {property.city && (
-                        <span className="popup-city">{property.city}</span>
-                      )}
-                      {property.zone && (
-                        <span className="popup-neighborhood">{property.zone}</span>
-                      )}
-                    </div>
-                    <div className="popup-features">
-                      {property.bedrooms && (
-                        <span className="feature">
-                          <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/>
-                          </svg>
-                          {property.bedrooms}
+          {filteredProperties.map((property) => {
+            const offsetPosition = addRandomOffset(property.latitude, property.longitude, property.id);
+            const circleColor = getCircleColor(property.operation);
+
+            return (
+              <AnyCircle
+                key={property.id}
+                center={offsetPosition}
+                radius={300}
+                pathOptions={{
+                  color: circleColor,
+                  fillColor: circleColor,
+                  fillOpacity: 0.2,
+                  weight: 2,
+                }}
+              >
+                <Popup className="property-popup" maxWidth={280} minWidth={250}>
+                  <div className="popup-content">
+                    {property.imageUrl && (
+                      <div className="popup-image">
+                        <img
+                          src={property.imageUrl}
+                          alt={property.title}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = PLACEHOLDER_IMAGE;
+                          }}
+                        />
+                        <span className={`popup-badge ${property.operation.toLowerCase()}`}>
+                          {property.operation === "SALE" ? "Venta" : "Alquiler"}
                         </span>
-                      )}
-                      {property.bathrooms && (
-                        <span className="feature">
-                          <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M7 7c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2m13 10v4h-2v-4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v4H4v-4c0-2.21 1.79-4 4-4h8c2.21 0 4 1.79 4 4m-7-8c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/>
-                          </svg>
-                          {property.bathrooms}
-                        </span>
-                      )}
-                      {property.area && (
-                        <span className="feature">
-                          <svg viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M19 19H5V5h14v14zM3 3v18h18V3H3z"/>
-                          </svg>
-                          {property.area}m²
-                        </span>
-                      )}
+                      </div>
+                    )}
+                    <div className="popup-info">
+                      <p className="popup-location-note">Ubicación aproximada</p>
+                      <h4 className="popup-title">{property.title}</h4>
+                      <p className="popup-price">{formatPrice(property.price, property.operation)}</p>
+                      <div className="popup-details">
+                        <span className="popup-type">{property.propertySubtype}</span>
+                        {property.city && (
+                          <span className="popup-city">{property.city}</span>
+                        )}
+                        {property.zone && (
+                          <span className="popup-neighborhood">{property.zone}</span>
+                        )}
+                      </div>
+                      <div className="popup-features">
+                        {property.bedrooms && (
+                          <span className="feature">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3 1.34 3 3 3zm12-6h-8v7H3V5H1v15h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4z"/>
+                            </svg>
+                            {property.bedrooms}
+                          </span>
+                        )}
+                        {property.bathrooms && (
+                          <span className="feature">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M7 7c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2m13 10v4h-2v-4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v4H4v-4c0-2.21 1.79-4 4-4h8c2.21 0 4 1.79 4 4m-7-8c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/>
+                            </svg>
+                            {property.bathrooms}
+                          </span>
+                        )}
+                        {property.area && (
+                          <span className="feature">
+                            <svg viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M19 19H5V5h14v14zM3 3v18h18V3H3z"/>
+                            </svg>
+                            {property.area}m²
+                          </span>
+                        )}
+                      </div>
+                      <a href={property.slug} className="popup-link">
+                        Ver detalles
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/>
+                        </svg>
+                      </a>
                     </div>
-                    <a href={property.slug} className="popup-link">
-                      Ver detalles
-                      <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8-8-8z"/>
-                      </svg>
-                    </a>
                   </div>
-                </div>
-              </Popup>
-            </AnyMarker>
-          ))}
+                </Popup>
+              </AnyCircle>
+            );
+          })}
         </AnyMapContainer>
       </div>
 
