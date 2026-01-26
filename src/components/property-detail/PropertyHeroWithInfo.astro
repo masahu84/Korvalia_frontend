@@ -12,6 +12,7 @@ export interface Props {
   city: string;
   neighborhood?: string;
   address?: string;
+  videos?: string[];
 }
 
 const {
@@ -25,26 +26,81 @@ const {
   areaM2,
   city,
   neighborhood,
-  address
+  address,
+  videos = []
 } = Astro.props;
 
 const mainImage = images[0] || 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&h=800&fit=crop';
 const formatPrice = (price: number) => new Intl.NumberFormat('es-ES').format(price);
+
+// Función para convertir URL de YouTube a formato embed
+function getYouTubeEmbedUrl(url: string): string | null {
+  if (!url) return null;
+
+  // Patrones de URLs de YouTube
+  const patterns = [
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([a-zA-Z0-9_-]+)/,
+    /(?:https?:\/\/)?(?:www\.)?youtu\.be\/([a-zA-Z0-9_-]+)/,
+    /(?:https?:\/\/)?(?:www\.)?youtube\.com\/embed\/([a-zA-Z0-9_-]+)/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return `https://www.youtube.com/embed/${match[1]}?rel=0&modestbranding=1`;
+    }
+  }
+
+  return null;
+}
+
+// Verificar si hay video y obtener URL de embed
+const hasVideo = videos && videos.length > 0;
+const videoEmbedUrl = hasVideo ? getYouTubeEmbedUrl(videos[0]) : null;
 ---
 
 <section class="property-hero-info">
   <div class="container">
     <div class="hero-grid">
-      <!-- Columna izquierda: Imagen -->
+      <!-- Columna izquierda: Video/Imagen -->
       <div class="image-column">
-        <!-- Imagen principal -->
+        <!-- Video principal (si existe) o Imagen principal -->
         <div class="main-image-wrapper">
-          <img src={mainImage} alt={title} class="main-image" id="main-property-image" />
+          {videoEmbedUrl ? (
+            <div class="video-container" id="main-video-container">
+              <iframe
+                src={videoEmbedUrl}
+                title={`Video de ${title}`}
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+                class="main-video"
+              ></iframe>
+            </div>
+          ) : (
+            <img src={mainImage} alt={title} class="main-image" id="main-property-image" />
+          )}
         </div>
 
-        <!-- Galería de thumbnails -->
-        {images.length > 1 && (
+        <!-- Galería de thumbnails (imágenes + botón de video si aplica) -->
+        {(images.length > 0 || hasVideo) && (
           <div class="thumbnails-grid">
+            {/* Botón para volver al video si hay video */}
+            {videoEmbedUrl && (
+              <button
+                class="thumbnail-btn video-thumb"
+                data-video={videoEmbedUrl}
+                aria-label="Ver video"
+              >
+                <div class="video-thumb-overlay">
+                  <svg viewBox="0 0 24 24" fill="currentColor" class="play-icon">
+                    <path d="M8 5v14l11-7z"/>
+                  </svg>
+                </div>
+                <img src={mainImage} alt="Video" class="thumbnail-img" />
+              </button>
+            )}
+            {/* Thumbnails de imágenes */}
             {images.map((img, index) => (
               <button
                 class="thumbnail-btn"
@@ -159,17 +215,63 @@ const formatPrice = (price: number) => new Intl.NumberFormat('es-ES').format(pri
 
   .main-image-wrapper {
     width: 100%;
+    height: 400px;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: #f3f4f6;
   }
 
   .main-image {
     width: 100%;
-    height: auto;
-    max-height: 400px;
+    height: 100%;
     object-fit: cover;
     display: block;
+  }
+
+  /* Video container */
+  .video-container {
+    width: 100%;
+    height: 100%;
+  }
+
+  .main-video {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  @media (max-width: 768px) {
+    .main-image-wrapper {
+      height: 280px;
+    }
+  }
+
+  /* Video thumbnail */
+  .video-thumb {
+    position: relative;
+  }
+
+  .video-thumb-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    border-radius: 6px;
+  }
+
+  .play-icon {
+    width: 32px;
+    height: 32px;
+    color: white;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+  }
+
+  .video-thumb:hover .video-thumb-overlay {
+    background: rgba(0, 0, 0, 0.5);
   }
 
   .thumbnails-grid {
@@ -321,16 +423,41 @@ const formatPrice = (price: number) => new Intl.NumberFormat('es-ES').format(pri
 </style>
 
 <script>
-  // Cambiar imagen principal al hacer clic en thumbnail
+  // Cambiar entre video e imágenes al hacer clic en thumbnails
   document.addEventListener('DOMContentLoaded', () => {
     const thumbnails = document.querySelectorAll('.thumbnail-btn');
-    const mainImage = document.getElementById('main-property-image') as HTMLImageElement;
+    const mainWrapper = document.querySelector('.main-image-wrapper') as HTMLElement;
+
+    if (!mainWrapper) return;
 
     thumbnails.forEach((thumb) => {
       thumb.addEventListener('click', () => {
         const imageUrl = thumb.getAttribute('data-image');
-        if (imageUrl && mainImage) {
-          mainImage.src = imageUrl;
+        const videoUrl = thumb.getAttribute('data-video');
+
+        if (videoUrl) {
+          // Mostrar video con estilos inline para asegurar consistencia
+          mainWrapper.innerHTML = `
+            <div style="width: 100%; height: 100%;">
+              <iframe
+                src="${videoUrl}"
+                title="Video de la propiedad"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+                style="width: 100%; height: 100%; border: none;"
+              ></iframe>
+            </div>
+          `;
+        } else if (imageUrl) {
+          // Mostrar imagen con estilos inline
+          mainWrapper.innerHTML = `
+            <img
+              src="${imageUrl}"
+              alt="Imagen de la propiedad"
+              style="width: 100%; height: 100%; object-fit: cover; display: block;"
+            />
+          `;
         }
       });
     });
