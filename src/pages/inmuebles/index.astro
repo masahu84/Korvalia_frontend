@@ -8,16 +8,16 @@
  * Mismo diseño visual que /propiedades
  */
 
-import MainLayout from '../../components/layout/MainLayout.astro';
-import PropertyHero from '../../components/properties/PropertyHero.astro';
-import PropertyIntro from '../../components/properties/PropertyIntro.astro';
-import EmblematicFilters from '../../components/emblematic/EmblematicFilters';
-import PropertyGrid from '../../components/properties/PropertyGrid';
-import EmblematicMap from '../../components/emblematic/EmblematicMap.astro';
-import FinalCTA from '../../components/home/FinalCTA';
-import type { Property } from '../../types/property';
+import MainLayout from "../../components/layout/MainLayout.astro";
+import PropertyHero from "../../components/properties/PropertyHero.astro";
+import PropertyIntro from "../../components/properties/PropertyIntro.astro";
+import EmblematicFilters from "../../components/emblematic/EmblematicFilters";
+import PropertyGrid from "../../components/properties/PropertyGrid";
+import EmblematicMap from "../../components/emblematic/EmblematicMap.astro";
+import FinalCTA from "../../components/home/FinalCTA";
+import type { Property } from "../../types/property";
 
-const API_BASE = import.meta.env.PUBLIC_API_URL || 'http://localhost:4000';
+const API_BASE = import.meta.env.PUBLIC_API_URL || "http://localhost:4000";
 
 // Placeholder para propiedades sin imagen
 const PLACEHOLDER_IMAGE = "https://placehold.co/800x600/e5e7eb/9ca3af?text=Sin+imagen";
@@ -46,26 +46,26 @@ try {
 
 // Obtener parámetros de búsqueda de la URL
 const url = new URL(Astro.request.url);
-const page = parseInt(url.searchParams.get('page') || '1');
-const modeId = url.searchParams.get('mode_id');
-const typeId = url.searchParams.get('type_id');
-const subtypeId = url.searchParams.get('subtype_id');
-const priceMin = url.searchParams.get('price_min');
-const priceMax = url.searchParams.get('price_max');
-const rooms = url.searchParams.get('rooms');
-const city = url.searchParams.get('city');
-const searchQuery = url.searchParams.get('q');
+const page = parseInt(url.searchParams.get("page") || "1");
+const modeId = url.searchParams.get("mode_id");
+const typeId = url.searchParams.get("type_id");
+const subtypeId = url.searchParams.get("subtype_id");
+const priceMin = url.searchParams.get("price_min");
+const priceMax = url.searchParams.get("price_max");
+const rooms = url.searchParams.get("rooms");
+const city = url.searchParams.get("city");
+const searchQuery = url.searchParams.get("q");
 
 // Construir query params para la API de Emblematic
 const queryParams = new URLSearchParams();
-queryParams.set('page', String(page));
-if (modeId) queryParams.set('mode_id', modeId);
-if (typeId) queryParams.set('type_id', typeId);
-if (subtypeId) queryParams.set('subtype_id', subtypeId);
-if (priceMin) queryParams.set('price_min', priceMin);
-if (priceMax) queryParams.set('price_max', priceMax);
-if (rooms) queryParams.set('rooms', rooms);
-if (city) queryParams.set('city', city);
+queryParams.set("page", String(page));
+if (modeId) queryParams.set("mode_id", modeId);
+if (typeId) queryParams.set("type_id", typeId);
+if (subtypeId) queryParams.set("subtype_id", subtypeId);
+if (priceMin) queryParams.set("price_min", priceMin);
+if (priceMax) queryParams.set("price_max", priceMax);
+if (rooms) queryParams.set("rooms", rooms);
+if (city) queryParams.set("city", city);
 
 let properties: Property[] = [];
 let totalResults = 0;
@@ -74,10 +74,8 @@ let currentPage = 1;
 
 try {
   const apiUrl = `${API_BASE}/api/emblematic/properties?${queryParams.toString()}`;
-  console.log('[Inmuebles Page] Fetching:', apiUrl);
   const response = await fetch(apiUrl);
   const result = await response.json();
-  console.log('[Inmuebles Page] Response:', result.success, 'Properties:', result.data?.properties?.length || 0);
 
   if (result.success && result.data) {
     const emblematicProperties = result.data.properties || [];
@@ -89,11 +87,12 @@ try {
     let filteredProperties = emblematicProperties;
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
-      filteredProperties = emblematicProperties.filter((p: any) =>
-        p.title?.toLowerCase().includes(query) ||
-        p.city?.toLowerCase().includes(query) ||
-        p.zone?.toLowerCase().includes(query) ||
-        p.description?.toLowerCase().includes(query)
+      filteredProperties = emblematicProperties.filter(
+        (p: any) =>
+          p.title?.toLowerCase().includes(query) ||
+          p.city?.toLowerCase().includes(query) ||
+          p.zone?.toLowerCase().includes(query) ||
+          p.description?.toLowerCase().includes(query),
       );
       totalResults = filteredProperties.length;
     }
@@ -101,7 +100,7 @@ try {
     // Mapear propiedades de Emblematic al formato Property
     properties = filteredProperties.map((p: any) => {
       // Generar título sin dirección exacta: "Piso en Centro, Sanlúcar"
-      const propertyTypeName = p.propertySubtype || p.propertyType || 'Inmueble';
+      const propertyTypeName = p.propertySubtype || p.propertyType || "Inmueble";
       const locationPart = p.zone ? `${p.zone}, ${p.city}` : p.city;
       const safeTitle = `${propertyTypeName} en ${locationPart}`;
 
@@ -110,10 +109,10 @@ try {
         title: safeTitle,
         slug: p.canonicalUrl, // URL completa tipo /3/piso-en-sanlucar
         price: p.price || 0,
-        city: p.city || '',
-        neighborhood: p.zone || '',
-        operation: p.operation === 'RENT' ? 'ALQUILER' : 'VENTA',
-        propertyType: p.propertySubtype || p.propertyType || '',
+        city: p.city || "",
+        neighborhood: p.zone || "",
+        operation: p.operation === "RENT" ? "ALQUILER" : "VENTA",
+        propertyType: p.propertySubtype || p.propertyType || "",
         areaM2: p.area || p.areaBuilt || null,
         bedrooms: p.rooms || null,
         bathrooms: p.bathrooms || null,
@@ -123,7 +122,7 @@ try {
     });
   }
 } catch (error) {
-  console.error('Error al obtener propiedades de Emblematic:', error);
+  console.error("Error al obtener propiedades de Emblematic:", error);
 }
 
 // Calcular información de paginación
@@ -133,22 +132,20 @@ const hasNextPage = currentPage < totalPages;
 const hasPrevPage = currentPage > 1;
 
 // Filtrar solo imágenes activas y ordenarlas
-const activeHeroImages = heroImages
-  .filter((img: any) => img.active)
-  .sort((a: any, b: any) => a.order - b.order);
+const activeHeroImages = heroImages.filter((img: any) => img.active).sort((a: any, b: any) => a.order - b.order);
 
 // Helper para construir URLs de paginación
 function buildPaginationUrl(pageNum: number): string {
   const params = new URLSearchParams();
-  if (modeId) params.set('mode_id', modeId);
-  if (typeId) params.set('type_id', typeId);
-  if (subtypeId) params.set('subtype_id', subtypeId);
-  if (priceMin) params.set('price_min', priceMin);
-  if (priceMax) params.set('price_max', priceMax);
-  if (rooms) params.set('rooms', rooms);
-  if (city) params.set('city', city);
-  if (searchQuery) params.set('q', searchQuery);
-  params.set('page', String(pageNum));
+  if (modeId) params.set("mode_id", modeId);
+  if (typeId) params.set("type_id", typeId);
+  if (subtypeId) params.set("subtype_id", subtypeId);
+  if (priceMin) params.set("price_min", priceMin);
+  if (priceMax) params.set("price_max", priceMax);
+  if (rooms) params.set("rooms", rooms);
+  if (city) params.set("city", city);
+  if (searchQuery) params.set("q", searchQuery);
+  params.set("page", String(pageNum));
   return `/inmuebles?${params.toString()}#properties-grid`;
 }
 
@@ -172,79 +169,86 @@ const hasActiveFilters = modeId || typeId || subtypeId || priceMin || priceMax |
   <section id="properties-grid" class="properties-section">
     <div class="container">
       <!-- Indicador de resultados de búsqueda -->
-      {searchQuery && (
-        <div class="search-results-banner">
-          <div class="search-results-content">
-            <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z"
-              />
-            </svg>
-            <span class="search-results-text">
-              {totalResults > 0
-                ? `Resultados de búsqueda para "${searchQuery}": ${totalResults} ${totalResults === 1 ? "propiedad encontrada" : "propiedades encontradas"}`
-                : `No se encontraron propiedades para "${searchQuery}"`}
-            </span>
-            <a href="/inmuebles" class="clear-search">
-              <svg class="close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      {
+        searchQuery && (
+          <div class="search-results-banner">
+            <div class="search-results-content">
+              <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M21 21l-4.35-4.35M10.5 18a7.5 7.5 0 100-15 7.5 7.5 0 000 15z"
+                />
               </svg>
-            </a>
+              <span class="search-results-text">
+                {totalResults > 0
+                  ? `Resultados de búsqueda para "${searchQuery}": ${totalResults} ${totalResults === 1 ? "propiedad encontrada" : "propiedades encontradas"}`
+                  : `No se encontraron propiedades para "${searchQuery}"`}
+              </span>
+              <a href="/inmuebles" class="clear-search">
+                <svg class="close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </a>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       <!-- Indicador de filtros activos (sin búsqueda) -->
-      {hasActiveFilters && !searchQuery && (
-        <div class="search-results-banner">
-          <div class="search-results-content">
-            <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-              />
-            </svg>
-            <span class="search-results-text">
-              {totalResults} {totalResults === 1 ? "propiedad encontrada" : "propiedades encontradas"} con los filtros aplicados
-            </span>
-            <a href="/inmuebles" class="clear-search">
-              <svg class="close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      {
+        hasActiveFilters && !searchQuery && (
+          <div class="search-results-banner">
+            <div class="search-results-content">
+              <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                />
               </svg>
-            </a>
+              <span class="search-results-text">
+                {totalResults} {totalResults === 1 ? "propiedad encontrada" : "propiedades encontradas"} con los filtros
+                aplicados
+              </span>
+              <a href="/inmuebles" class="clear-search">
+                <svg class="close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </a>
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       <PropertyGrid properties={properties} client:load />
 
       <!-- Paginación -->
-      {totalPages > 1 && (
-        <div class="pagination-wrapper">
-          <div class="pagination">
-            {hasPrevPage && (
-              <a href={buildPaginationUrl(currentPage - 1)} class="pagination-btn">
-                ← Anterior
-              </a>
-            )}
+      {
+        totalPages > 1 && (
+          <div class="pagination-wrapper">
+            <div class="pagination">
+              {hasPrevPage && (
+                <a href={buildPaginationUrl(currentPage - 1)} class="pagination-btn">
+                  ← Anterior
+                </a>
+              )}
 
-            <span class="pagination-info">
-              Página {currentPage} de {totalPages}
-            </span>
+              <span class="pagination-info">
+                Página {currentPage} de {totalPages}
+              </span>
 
-            {hasNextPage && (
-              <a href={buildPaginationUrl(currentPage + 1)} class="pagination-btn">
-                Siguiente →
-              </a>
-            )}
+              {hasNextPage && (
+                <a href={buildPaginationUrl(currentPage + 1)} class="pagination-btn">
+                  Siguiente →
+                </a>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
     </div>
   </section>
 

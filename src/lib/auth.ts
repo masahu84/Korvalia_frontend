@@ -2,7 +2,7 @@
  * Utilidades de autenticación
  */
 
-import { post, get } from './api';
+import { post, get } from "./api";
 
 export interface User {
   id: number;
@@ -19,19 +19,20 @@ export interface LoginResponse {
 /**
  * Realiza login y guarda el token
  */
-export async function login(email: string, password: string): Promise<{
+export async function login(
+  email: string,
+  password: string,
+): Promise<{
   success: boolean;
   user?: User;
   error?: string;
 }> {
-  console.log('Attempting login with:', { email });
-  const response = await post<LoginResponse>('/auth/login', { email, password });
-  console.log('Login response:', response);
+  const response = await post<LoginResponse>("/auth/login", { email, password });
 
   if (response.success && response.data) {
     // Guardar token en localStorage
-    localStorage.setItem('token', response.data.token);
-    localStorage.setItem('user', JSON.stringify(response.data.user));
+    localStorage.setItem("token", response.data.token);
+    localStorage.setItem("user", JSON.stringify(response.data.user));
 
     return {
       success: true,
@@ -41,7 +42,7 @@ export async function login(email: string, password: string): Promise<{
 
   return {
     success: false,
-    error: response.error || 'Error al iniciar sesión',
+    error: response.error || "Error al iniciar sesión",
   };
 }
 
@@ -49,17 +50,17 @@ export async function login(email: string, password: string): Promise<{
  * Cierra sesión
  */
 export function logout(): void {
-  localStorage.removeItem('token');
-  localStorage.removeItem('user');
-  window.location.href = '/admin/login';
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  window.location.href = "/admin/login";
 }
 
 /**
  * Verifica si el usuario está autenticado
  */
 export function isAuthenticated(): boolean {
-  if (typeof window === 'undefined') return false;
-  const token = localStorage.getItem('token');
+  if (typeof window === "undefined") return false;
+  const token = localStorage.getItem("token");
   return !!token;
 }
 
@@ -67,9 +68,9 @@ export function isAuthenticated(): boolean {
  * Obtiene el usuario actual del localStorage
  */
 export function getCurrentUser(): User | null {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
 
-  const userStr = localStorage.getItem('user');
+  const userStr = localStorage.getItem("user");
   if (!userStr) return null;
 
   try {
@@ -86,11 +87,11 @@ export async function verifyAuth(): Promise<{
   success: boolean;
   user?: User;
 }> {
-  const response = await get<User>('/auth/me');
+  const response = await get<User>("/auth/me");
 
   if (response.success && response.data) {
     // Actualizar usuario en localStorage
-    localStorage.setItem('user', JSON.stringify(response.data));
+    localStorage.setItem("user", JSON.stringify(response.data));
 
     return {
       success: true,
@@ -111,6 +112,6 @@ export async function verifyAuth(): Promise<{
  */
 export function requireAuth(): void {
   if (!isAuthenticated()) {
-    window.location.href = '/admin/login';
+    window.location.href = "/admin/login";
   }
 }
