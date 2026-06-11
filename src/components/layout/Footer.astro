@@ -45,11 +45,15 @@ const hasSocialMedia = instagramUrl || facebookUrl || linkedinUrl;
   <div class="footer-container">
     <!-- Parte superior -->
     <div class="footer-top">
-      <!-- Logo -->
+      <!-- Logo y dirección -->
       <div class="footer-logo">
         <a href="/">
           <img src={logoUrl} alt={companyName} class="footer-logo-img" />
         </a>
+        <p class="footer-address">
+          Calle Cristóbal Colón 19<br />
+          Sanlúcar de Barrameda (Cádiz)
+        </p>
       </div>
 
       <!-- Enlaces -->
@@ -158,6 +162,13 @@ const hasSocialMedia = instagramUrl || facebookUrl || linkedinUrl;
     height: auto;
     display: block;
     mix-blend-mode: multiply;
+  }
+
+  .footer-address {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #6b7280;
   }
 
   .footer-links {
