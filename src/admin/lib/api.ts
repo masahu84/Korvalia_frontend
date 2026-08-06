@@ -71,8 +71,10 @@ export async function apiFetch<T = any>(
     headers: fetchHeaders,
   });
 
-  // Manejar errores de autenticación
-  if (response.status === 401) {
+  // Manejar sesión caducada: solo en peticiones autenticadas (token inválido/expirado).
+  // En peticiones públicas (login, reset) un 401 es un error de negocio (ej: credenciales
+  // inválidas) y debe propagarse al formulario, NO redirigir/recargar la página.
+  if (response.status === 401 && requiresAuth) {
     removeToken();
     if (typeof window !== 'undefined') {
       window.location.href = '/admin/login';
@@ -82,7 +84,8 @@ export async function apiFetch<T = any>(
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.message || 'Error en la petición');
+    // El backend devuelve el mensaje en `error`; se contempla `message` como fallback.
+    throw new Error(errorData.error || errorData.message || 'Error en la petición');
   }
 
   return response.json();

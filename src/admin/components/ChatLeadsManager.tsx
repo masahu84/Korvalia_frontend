@@ -156,18 +156,27 @@ function ChatLeadsManagerInner() {
         gap: '1rem',
         marginBottom: '2rem'
       }}>
-        <div className="admin-card" style={{ padding: '1.25rem' }}>
-          <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Total Conversaciones</div>
-          <div style={{ fontSize: '2rem', fontWeight: '700', color: '#111827' }}>{total}</div>
+        <div className="admin-card" style={{ padding: '1.25rem', marginBottom: 0, display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: '#eff6ff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', flexShrink: 0 }}>💬</div>
+          <div>
+            <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#111827', lineHeight: 1.1 }}>{total}</div>
+            <div style={{ fontSize: '0.8125rem', color: '#6b7280' }}>Total Conversaciones</div>
+          </div>
         </div>
-        <div className="admin-card" style={{ padding: '1.25rem' }}>
-          <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Leads Capturados</div>
-          <div style={{ fontSize: '2rem', fontWeight: '700', color: '#d97706' }}>{leadsCount}</div>
+        <div className="admin-card" style={{ padding: '1.25rem', marginBottom: 0, display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', flexShrink: 0 }}>🎯</div>
+          <div>
+            <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#d97706', lineHeight: 1.1 }}>{leadsCount}</div>
+            <div style={{ fontSize: '0.8125rem', color: '#6b7280' }}>Leads Capturados</div>
+          </div>
         </div>
-        <div className="admin-card" style={{ padding: '1.25rem' }}>
-          <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>Activas</div>
-          <div style={{ fontSize: '2rem', fontWeight: '700', color: '#059669' }}>
-            {conversations.filter(c => c.status === 'ACTIVE').length}
+        <div className="admin-card" style={{ padding: '1.25rem', marginBottom: 0, display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ width: '44px', height: '44px', borderRadius: '10px', backgroundColor: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', flexShrink: 0 }}>🟢</div>
+          <div>
+            <div style={{ fontSize: '1.75rem', fontWeight: '700', color: '#059669', lineHeight: 1.1 }}>
+              {conversations.filter(c => c.status === 'ACTIVE').length}
+            </div>
+            <div style={{ fontSize: '0.8125rem', color: '#6b7280' }}>Activas</div>
           </div>
         </div>
       </div>
@@ -204,11 +213,14 @@ function ChatLeadsManagerInner() {
       </div>
 
       {/* Contenido principal */}
-      <div style={{ display: 'grid', gridTemplateColumns: selectedConversation ? '1fr 1fr' : '1fr', gap: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: selectedConversation ? 'minmax(0, 1fr) minmax(0, 1.1fr)' : '1fr', gap: '1.5rem', alignItems: 'start' }}>
         {/* Lista de conversaciones */}
-        <div className="admin-card">
-          <div className="admin-card-header">
-            <h2 className="admin-card-title">Conversaciones ({conversations.length})</h2>
+        <div className="admin-card" style={{ padding: 0, marginBottom: 0, overflow: 'hidden', position: 'sticky', top: '1.5rem' }}>
+          <div className="admin-card-header" style={{ margin: 0, padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h2 className="admin-card-title">Conversaciones</h2>
+            <span style={{ fontSize: '0.8125rem', color: '#6b7280', backgroundColor: '#f3f4f6', padding: '0.125rem 0.625rem', borderRadius: '9999px', fontWeight: 600 }}>
+              {conversations.length}
+            </span>
           </div>
 
           {conversations.length === 0 ? (
@@ -217,7 +229,7 @@ function ChatLeadsManagerInner() {
               <p style={{ color: '#6b7280' }}>No hay conversaciones</p>
             </div>
           ) : (
-            <div style={{ maxHeight: '600px', overflowY: 'auto' }}>
+            <div style={{ maxHeight: 'calc(100vh - 320px)', minHeight: '320px', overflowY: 'auto' }}>
               {conversations.map(conv => (
                 <div
                   key={conv.id}
@@ -307,8 +319,8 @@ function ChatLeadsManagerInner() {
 
         {/* Detalle de conversación */}
         {selectedConversation && (
-          <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', maxHeight: '700px' }}>
-            <div className="admin-card-header" style={{ borderBottom: '1px solid #e5e7eb' }}>
+          <div className="admin-card" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 220px)', minHeight: '420px', padding: 0, marginBottom: 0, overflow: 'hidden', position: 'sticky', top: '1.5rem' }}>
+            <div className="admin-card-header" style={{ margin: 0, padding: '1.25rem 1.5rem', borderBottom: '1px solid #e5e7eb' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <h2 className="admin-card-title">
@@ -328,12 +340,20 @@ function ChatLeadsManagerInner() {
                 <button
                   onClick={() => setSelectedConversation(null)}
                   style={{
-                    background: 'none',
+                    background: '#f3f4f6',
                     border: 'none',
                     cursor: 'pointer',
-                    padding: '0.25rem',
-                    color: '#9ca3af',
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#6b7280',
+                    fontSize: '0.875rem',
+                    flexShrink: 0,
                   }}
+                  aria-label="Cerrar conversación"
                 >
                   ✕
                 </button>

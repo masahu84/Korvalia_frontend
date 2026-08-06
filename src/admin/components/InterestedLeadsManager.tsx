@@ -126,17 +126,17 @@ export default function InterestedLeadsManager() {
     <div>
       {/* Header */}
       <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#111827', marginBottom: '0.5rem' }}>
+        <h1 style={{ fontSize: '1.875rem', fontWeight: '700', color: '#111827', marginBottom: '0.5rem' }}>
           Personas Interesadas
         </h1>
-        <p style={{ color: '#6b7280' }}>
+        <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
           Listado de personas que han dejado su telefono en la web
         </p>
       </div>
 
       {/* Stats */}
       <div className="admin-grid admin-grid-4" style={{ marginBottom: '2rem' }}>
-        <div className="admin-card" style={{ padding: '1rem' }}>
+        <div className="admin-card" style={{ padding: '1rem', marginBottom: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{
               width: '40px',
@@ -157,7 +157,7 @@ export default function InterestedLeadsManager() {
           </div>
         </div>
 
-        <div className="admin-card" style={{ padding: '1rem' }}>
+        <div className="admin-card" style={{ padding: '1rem', marginBottom: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{
               width: '40px',
@@ -180,7 +180,7 @@ export default function InterestedLeadsManager() {
           </div>
         </div>
 
-        <div className="admin-card" style={{ padding: '1rem' }}>
+        <div className="admin-card" style={{ padding: '1rem', marginBottom: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{
               width: '40px',
@@ -203,7 +203,7 @@ export default function InterestedLeadsManager() {
           </div>
         </div>
 
-        <div className="admin-card" style={{ padding: '1rem' }}>
+        <div className="admin-card" style={{ padding: '1rem', marginBottom: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{
               width: '40px',
